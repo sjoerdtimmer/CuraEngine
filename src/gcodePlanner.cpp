@@ -31,10 +31,11 @@ void GCodePlanner::forceNewPathStart()
         paths[paths.size()-1].done = true;
 }
 
-GCodePlanner::GCodePlanner(GCodeExport& gcode, SliceDataStorage& storage, RetractionConfig* retraction_config_travel, double travelSpeed, bool retraction_combing, unsigned int layer_nr, int64_t comb_boundary_offset, bool travel_avoid_other_parts, int64_t travel_avoid_distance)
+GCodePlanner::GCodePlanner(CommandSocket* commandSocket, GCodeExport& gcode, SliceDataStorage& storage, RetractionConfig* retraction_config_travel, double travelSpeed, bool retraction_combing, unsigned int layer_nr, int64_t comb_boundary_offset, bool travel_avoid_other_parts, int64_t travel_avoid_distance)
 : gcode(gcode), storage(storage)
 , travelConfig(retraction_config_travel, "MOVE")
 {
+    gcode.setCommandSocketAndLayerNr(commandSocket, layer_nr);
     lastPosition = gcode.getPositionXY();
     travelConfig.setSpeed(travelSpeed);
     comb = nullptr;
@@ -108,11 +109,14 @@ void GCodePlanner::moveInsideCombBoundary(int distance)
 void GCodePlanner::addTravel(Point p)
 {
     GCodePath* path = nullptr;
-
+    
+    bool combed = false;
+    
     if (comb != nullptr && lastPosition != Point(0,0))
     {
         CombPaths combPaths;
-        if (comb->calc(lastPosition, p, combPaths, was_combing, is_going_to_comb))
+        combed = comb->calc(lastPosition, p, combPaths, was_combing, is_going_to_comb, last_retraction_config->retraction_min_travel_distance);
+        if (combed)
         {
             bool retract = combPaths.size() > 1;
             { // check whether we want to retract
@@ -153,17 +157,23 @@ void GCodePlanner::addTravel(Point p)
                 }
             }
         }
-        else
-        {
-            path = getLatestPathWithConfig(&travelConfig);
-            if (!shorterThen(lastPosition - p, last_retraction_config->retraction_min_travel_distance))
-            {
-                path->retract = true;
-            }
-        }
         was_combing = is_going_to_comb;
     }
     
+    if(!combed) {
+        // no combing? always retract!
+        path = getLatestPathWithConfig(&travelConfig);
+        if (!shorterThen(lastPosition - p, last_retraction_config->retraction_min_travel_distance))
+        {
+            path->retract = true;
+        }
+    }
+    
+    if(comb == nullptr) {
+        // no combing? always retract!
+        path = getLatestPathWithConfig(&travelConfig);
+        path->retract = true;
+    }
     addTravel_simple(p, path);
 }
 

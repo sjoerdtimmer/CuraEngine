@@ -8,7 +8,7 @@
 namespace cura {
 
 GCodeExport::GCodeExport()
-: output_stream(&std::cout), currentPosition(0,0,0), startPosition(INT32_MIN,INT32_MIN,0)
+: commandSocket(nullptr), output_stream(&std::cout), layer_nr(0), currentPosition(0,0,0), startPosition(INT32_MIN,INT32_MIN,0)
 {
     extrusion_amount = 0;
     current_extruder = 0;
@@ -19,13 +19,18 @@ GCodeExport::GCodeExport()
     currentSpeed = 1;
     retractionPrimeSpeed = 1;
     isRetracted = false;
-    isZHopped = false;
+    isZHopped = 0;
     last_coasted_amount_mm3 = 0;
     setFlavor(EGCodeFlavor::REPRAP);
 }
 
 GCodeExport::~GCodeExport()
 {
+}
+
+void GCodeExport::setCommandSocketAndLayerNr(CommandSocket* commandSocket_, unsigned int layer_nr_) {
+    commandSocket = commandSocket_;
+    layer_nr = layer_nr_;
 }
 
 void GCodeExport::setOutputStream(std::ostream* stream)
@@ -174,6 +179,11 @@ void GCodeExport::writeLayerComment(int layer_nr)
     *output_stream << ";LAYER:" << layer_nr << "\n";
 }
 
+void GCodeExport::writeLayerCountComment(int layer_count)
+{
+    *output_stream << ";LAYER_COUNT:" << layer_count << "\n";
+}
+
 void GCodeExport::writeLine(const char* line)
 {
     *output_stream << line << "\n";
@@ -212,7 +222,7 @@ void GCodeExport::writeMove(int x, int y, int z, double speed, double extrusion_
     if (currentPosition.x == x && currentPosition.y == y && currentPosition.z == z)
         return;
     
-    assert(speed*60 < 10000 && speed*60 > 100); // normal F values occurring in UM2 gcode (this code should not be compiled for release)
+    assert(speed < 200 && speed > 1); // normal F values occurring in UM2 gcode (this code should not be compiled for release)
     assert((Point3(x,y,z) - currentPosition).vSize() < MM2INT(300)); // no crazy positions (this code should not be compiled for release)
     
     if (extrusion_mm3_per_mm < 0)
@@ -279,7 +289,7 @@ void GCodeExport::writeMove(int x, int y, int z, double speed, double extrusion_
             if (isZHopped > 0)
             {
                 *output_stream << std::setprecision(3) << "G1 Z" << INT2MM(currentPosition.z) << "\n";
-                isZHopped = false;
+                isZHopped = 0;
             }
             extrusion_amount += (is_volumatric) ? last_coasted_amount_mm3 : last_coasted_amount_mm3 / getFilamentArea(current_extruder);   
             if (isRetracted)
@@ -315,6 +325,15 @@ void GCodeExport::writeMove(int x, int y, int z, double speed, double extrusion_
             *output_stream << "G1";
         }else{
             *output_stream << "G0";
+                    
+            if (commandSocket) {
+                // we should send this travel as a non-retraction move
+                cura::Polygons travelPoly;
+                PolygonRef travel = travelPoly.newPoly();
+                travel.add(Point(currentPosition.x, currentPosition.y));
+                travel.add(Point(x, y));
+                commandSocket->sendPolygons(isRetracted ? MoveRetractionType : MoveCombingType, layer_nr, travelPoly, isRetracted ? MM2INT(0.2) : MM2INT(0.1));
+            }                    
         }
 
         if (currentSpeed != speed)
@@ -327,7 +346,7 @@ void GCodeExport::writeMove(int x, int y, int z, double speed, double extrusion_
             " X" << INT2MM(gcode_pos.X) << 
             " Y" << INT2MM(gcode_pos.Y);
         if (z != currentPosition.z)
-            *output_stream << " Z" << INT2MM(z);
+            *output_stream << " Z" << INT2MM(z + isZHopped);
         if (extrusion_mm3_per_mm > 0.000001)
             *output_stream << " " << extruder_attr[current_extruder].extruderCharacter << std::setprecision(5) << extrusion_amount;
         *output_stream << "\n";
@@ -370,8 +389,8 @@ void GCodeExport::writeRetraction(RetractionConfig* config, bool force)
     }
     if (config->zHop > 0)
     {
-        *output_stream << std::setprecision(3) << "G1 Z" << INT2MM(currentPosition.z + config->zHop) << "\n";
-        isZHopped = true;
+        isZHopped = config->zHop;
+        *output_stream << std::setprecision(3) << "G1 Z" << INT2MM(currentPosition.z + isZHopped) << "\n";
     }
     extrusion_amount_at_previous_n_retractions.push_front(extrusion_amount);
     if (int(extrusion_amount_at_previous_n_retractions.size()) == config->retraction_count_max)

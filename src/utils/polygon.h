@@ -30,7 +30,9 @@ enum PolygonType
     SupportType,
     SkirtType,
     InfillType,
-    SupportInfillType
+    SupportInfillType,
+    MoveCombingType,
+    MoveRetractionType
 };
 
 
@@ -376,6 +378,13 @@ public:
         clipper.AddPaths(other.polygons, ClipperLib::ptSubject, true);
         clipper.Execute(ClipperLib::ctUnion, ret.polygons, ClipperLib::pftNonZero, ClipperLib::pftNonZero);
         return ret;
+    }
+    /*!
+     * Union all polygons with each other (When polygons.add(polygon) has been called for overlapping polygons)
+     */
+    Polygons unionPolygons() const
+    {
+        return unionPolygons(Polygons());
     }
     Polygons intersection(const Polygons& other) const
     {

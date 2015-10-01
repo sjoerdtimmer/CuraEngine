@@ -10,6 +10,8 @@
 #include "utils/intpoint.h"
 #include "timeEstimate.h"
 #include "MeshGroup.h"
+#include "commandSocket.h"
+#include "GcodeBuffer.h"
 
 namespace cura {
 
@@ -98,6 +100,11 @@ public:
         return line_width;
     }
 
+    int getLayerHeight()
+    {
+        return layer_thickness;
+    }
+    
 private:
     void calculateExtrusion()
     {
@@ -138,10 +145,17 @@ private:
         , currentTemperature(0)
         { }
     };
+
+    // for sending jump data
+    CommandSocket* commandSocket; 
+    
+    std::ostream* output_stream;
+    
+    unsigned int layer_nr;
+    
     ExtruderTrainAttributes extruder_attr[MAX_EXTRUDERS];
     bool use_extruder_offset_to_offset_coords;
     
-    std::ostream* output_stream;
     double extrusion_amount; // in mm or mm^3
     std::deque<double> extrusion_amount_at_previous_n_retractions; // in mm or mm^3
     Point3 currentPosition;
@@ -149,7 +163,7 @@ private:
     double currentSpeed;
     int zPos;
     bool isRetracted;
-    bool isZHopped;
+    int isZHopped;
 
     double last_coasted_amount_mm3; //!< The coasted amount of filament to be primed on the first next extrusion. (same type as GCodeExport::extrusion_amount)
     double retractionPrimeSpeed;
@@ -165,6 +179,8 @@ public:
     
     GCodeExport();
     ~GCodeExport();
+    
+    void setCommandSocketAndLayerNr(CommandSocket* commandSocket, unsigned int layer_nr);
     
     void setOutputStream(std::ostream* stream);
     
@@ -205,6 +221,7 @@ public:
     void writeComment(std::string comment);
     void writeTypeComment(const char* type);
     void writeLayerComment(int layer_nr);
+    void writeLayerCountComment(int layer_count);
     
     void writeLine(const char* line);
     

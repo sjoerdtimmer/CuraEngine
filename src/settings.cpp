@@ -146,7 +146,8 @@ bool SettingsBaseVirtual::getSettingBoolean(std::string key)
         return true;
     if (value == "true" or value == "True") //Python uses "True"
         return true;
-    return atoi(value.c_str()) != 0;
+    int num = atoi(value.c_str());
+    return num != 0;
 }
 
 double SettingsBaseVirtual::getSettingInDegreeCelsius(std::string key)
@@ -228,7 +229,7 @@ ESupportType SettingsBaseVirtual::getSettingAsSupportType(std::string key)
     std::string value = getSettingString(key);
     if (value == "everywhere")
         return ESupportType::EVERYWHERE;
-    if (value == "touching_buildplate")
+    if (value == "buildplate")
         return ESupportType::PLATFORM_ONLY;
     return ESupportType::NONE;
 }
@@ -257,5 +258,22 @@ ESurfaceMode SettingsBaseVirtual::getSettingAsSurfaceMode(std::string key)
     return ESurfaceMode::NORMAL;
 }
 
+FillPerimeterGapMode SettingsBaseVirtual::getSettingAsFillPerimeterGapMode(std::string key)
+{
+    std::string value = getSettingString(key);
+    if (value == "nowhere")
+    {
+        return FillPerimeterGapMode::NOWHERE;
+    }
+    if (value == "everywhere")
+    {
+        return FillPerimeterGapMode::EVERYWHERE;
+    }
+    if (value == "skin")
+    {
+        return FillPerimeterGapMode::SKIN;
+    }
+    return FillPerimeterGapMode::NOWHERE;
+}
 
 }//namespace cura
