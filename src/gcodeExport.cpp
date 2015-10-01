@@ -8,7 +8,7 @@
 namespace cura {
 
 GCodeExport::GCodeExport()
-: commandSocket(nullptr), output_stream(&std::cout), layer_nr(0), currentPosition(0,0,0), startPosition(INT32_MIN,INT32_MIN,0)
+: commandSocket(nullptr), layer_nr(0), currentPosition(0,0,0), startPosition(INT32_MIN,INT32_MIN,0)
 {
     extrusion_amount = 0;
     current_extruder = 0;
@@ -35,8 +35,7 @@ void GCodeExport::setCommandSocketAndLayerNr(CommandSocket* commandSocket_, unsi
 
 void GCodeExport::setOutputStream(std::ostream* stream)
 {
-    output_stream = stream;
-    *output_stream << std::fixed;
+    output_stream.setOutputStream(stream);
 }
 
 Point GCodeExport::getExtruderOffset(int id)
@@ -514,7 +513,7 @@ void GCodeExport::finalize(int maxObjectHeight, double moveSpeed, const char* en
     for(int n=1; n<MAX_EXTRUDERS; n++)
         if (getTotalFilamentUsed(n) > 0)
             log("Filament%d: %d\n", n + 1, int(getTotalFilamentUsed(n)));
-    output_stream->flush();
+    output_stream.flush();
 }
 
 }//namespace cura

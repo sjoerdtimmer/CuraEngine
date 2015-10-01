@@ -7,6 +7,7 @@
 #include <ostream>
 #include <algorithm>
 #include <list>
+#include <iostream>
 
 #include "utils/logoutput.h"
 
@@ -54,17 +55,30 @@ class GcodeBuffer
     
     double total_time; // the total amount of time it takes to print all gcode currently in this buffer
     
+    std::ostream* output_stream;
 public:
     GcodeBuffer()
     : total_time(0.0)
+    , output_stream(&std::cout)
     { 
         gcode_blocks.push_back(new Block());
+    }
+    
+    GcodeBuffer& operator*() 
+    {
+        return *this;
+    }
+    
+    void setOutputStream(std::ostream* stream)
+    {
+        output_stream = stream;
+        *output_stream << std::fixed;
     }
     
     template<typename T>
     GcodeBuffer& operator<<(T t) 
     {
-        gcode_blocks.back() << t;
+        *gcode_blocks.back() << t;
         return *this;
     }
     
@@ -114,27 +128,36 @@ public:
         }
     }
     
-    void flush(std::ostream os)
+    /*!
+     * Flush the content of the buffer, including the inserts.
+     * 
+     * Write content to the output_stream and
+     * reset all gcode, inserts and time estimates in the buffer.
+     */
+    void flush()
     {
         inserts.sort([](const Insert& a, const Insert& b) -> bool { return a.pos < b.pos; } );
         for (unsigned int block_idx = 0; block_idx < gcode_blocks.size(); block_idx++)
         {
             while (block_idx == inserts.front().getPos())
             { // insert all inserts which should be inserted at this position (in arbitrary order)
-                os << inserts.front().str();
+                *output_stream << inserts.front().str();
                 inserts.pop_front();
             }
                 
             Block& block = *gcode_blocks[block_idx];
-            os << block.str();
+            *output_stream << block.str();
         }
         while ( ! inserts.empty())
         { // insert all inserts which should be inserted at the end (and all inserts which were accidentally skipped)
-            os << inserts.front().str();
+            *output_stream << inserts.front().str();
             inserts.pop_front();
         }
         
-        
+        for (Block* block : gcode_blocks)
+        {
+            delete block;
+        }
         gcode_blocks.clear();
         gcode_blocks.push_back(new Block());
         inserts.clear();

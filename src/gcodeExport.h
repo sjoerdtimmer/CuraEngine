@@ -149,7 +149,7 @@ private:
     // for sending jump data
     CommandSocket* commandSocket; 
     
-    std::ostream* output_stream;
+    GcodeBuffer output_stream;
     
     unsigned int layer_nr;
     
