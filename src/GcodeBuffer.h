@@ -139,7 +139,7 @@ public:
         inserts.sort([](const Insert& a, const Insert& b) -> bool { return a.pos < b.pos; } );
         for (unsigned int block_idx = 0; block_idx < gcode_blocks.size(); block_idx++)
         {
-            while (block_idx == inserts.front().getPos())
+            while ( ! inserts.empty() && block_idx == inserts.front().getPos())
             { // insert all inserts which should be inserted at this position (in arbitrary order)
                 *output_stream << inserts.front().str();
                 inserts.pop_front();

@@ -209,11 +209,15 @@ void GCodeExport::writeDelay(double timeAmount)
 void GCodeExport::writeMove(Point p, double speed, double extrusion_mm3_per_mm)
 {
     writeMove(p.X, p.Y, zPos, speed, extrusion_mm3_per_mm);
+    
+    output_stream.flush(); // TEMPORARY CODE!!
 }
 
 void GCodeExport::writeMove(Point3 p, double speed, double extrusion_mm3_per_mm)
 {
     writeMove(p.x, p.y, p.z, speed, extrusion_mm3_per_mm);
+    
+    output_stream.flush(); // TEMPORARY CODE!!
 }
 
 void GCodeExport::writeMove(int x, int y, int z, double speed, double extrusion_mm3_per_mm)
