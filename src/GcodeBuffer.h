@@ -34,7 +34,11 @@ class GcodeBuffer
     {
     public:
         double time; // estimation of the time it takes to print the gcode commands present in this block of gcode
-        Block() : time(0.0) { }
+        Block() 
+        : time(0.0) 
+        { 
+            *this << std::fixed;
+        }
     };
     
     class Insert : public std::stringstream
@@ -46,7 +50,11 @@ class GcodeBuffer
         { 
             return pos; 
         }
-        Insert(unsigned int pos) : pos(pos) { }
+        Insert(unsigned int pos) 
+        : pos(pos) 
+        { 
+            *this << std::fixed;
+        }
     };
     
     std::vector<Block*> gcode_blocks; // the actual buffer (should always contain at least one Block to write to)
