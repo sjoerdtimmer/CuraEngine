@@ -149,7 +149,7 @@ private:
     // for sending jump data
     CommandSocket* commandSocket; 
     
-    GcodeBuffer output_stream;
+    GcodeBuffer gcode_buffer;
     
     unsigned int layer_nr;
     
