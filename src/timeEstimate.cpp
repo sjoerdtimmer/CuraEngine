@@ -202,7 +202,6 @@ double TimeEstimateCalculator::calculate()
         gcode_block->time += acceleration_time_from_distance(block.final_feedrate, (block.distance - block.decelerate_after), block.acceleration);
         totalTime += gcode_block->time;
         
-        logError("%f\n", gcode_block->time);
         if (isnan(totalTime))
         {
             std::cerr << ">>>> " << gcode_block->str() << std::endl;
@@ -241,8 +240,9 @@ void TimeEstimateCalculator::reverse_pass()
 {
     Block* block[3] = {nullptr, nullptr, nullptr};
 
-    for(GcodeBlock* gcode_block : gcode_blocks)
+    for(unsigned int block_idx = gcode_blocks.size()-1; int(block_idx) >= 0; block_idx--)
     {
+        GcodeBlock* gcode_block = gcode_blocks[block_idx];
         if (gcode_block->time != 0.0) { continue; }
         block[2]= block[1];
         block[1]= block[0];
