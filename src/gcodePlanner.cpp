@@ -423,7 +423,7 @@ void GCodePlanner::writeGCode(bool liftHeadIfNeeded, int layerThickness)
         }
     }
 
-    gcode.updateTotalPrintTime();
+    gcode.flush();
     if (liftHeadIfNeeded && extraTime > 0.0)
     {
         gcode.writeComment("Small layer, adding delay");

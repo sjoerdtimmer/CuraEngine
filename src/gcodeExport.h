@@ -170,9 +170,6 @@ private:
     int current_extruder;
     int currentFanSpeed;
     EGCodeFlavor flavor;
-
-    double totalPrintTime;
-    TimeEstimateCalculator estimateCalculator;
     
     bool is_volumatric;
 public:
@@ -215,7 +212,7 @@ public:
     double getTotalFilamentUsed(int e);
 
     double getTotalPrintTime();
-    void updateTotalPrintTime();
+    void flush();
     void resetTotalPrintTimeAndFilament();
     
     void writeComment(std::string comment);

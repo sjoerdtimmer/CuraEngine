@@ -30,6 +30,7 @@ set(engine_SRCS
     src/FffGcodeWriter.cpp
     src/FffPolygonGenerator.cpp
     src/FffProcessor.cpp
+    src/GcodeBuffer.cpp
     src/gcodeExport.cpp
     src/gcodePlanner.cpp
     src/infill.cpp

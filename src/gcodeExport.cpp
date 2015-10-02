@@ -14,8 +14,6 @@ GCodeExport::GCodeExport()
     current_extruder = 0;
     currentFanSpeed = -1;
     
-    totalPrintTime = 0.0;
-    
     currentSpeed = 1;
     retractionPrimeSpeed = 1;
     isRetracted = false;
@@ -143,25 +141,23 @@ double GCodeExport::getTotalFilamentUsed(int e)
 
 double GCodeExport::getTotalPrintTime()
 {
-    return totalPrintTime;
+    return output_stream.getTotalPrintTime();
 }
 
 void GCodeExport::resetTotalPrintTimeAndFilament()
 {
-    totalPrintTime = 0;
     for(unsigned int e=0; e<MAX_EXTRUDERS; e++)
     {
         extruder_attr[e].totalFilament = 0.0;
         extruder_attr[e].currentTemperature = 0;
     }
     extrusion_amount = 0.0;
-    estimateCalculator.reset();
+    output_stream.resetTotalPrintTime();
 }
 
-void GCodeExport::updateTotalPrintTime()
+void GCodeExport::flush()
 {
-    totalPrintTime += estimateCalculator.calculate();
-    estimateCalculator.reset();
+    output_stream.flush();
 }
 
 void GCodeExport::writeComment(std::string comment)
@@ -203,21 +199,17 @@ void GCodeExport::resetExtrusionValue()
 void GCodeExport::writeDelay(double timeAmount)
 {
     *output_stream << "G4 P" << int(timeAmount * 1000) << "\n";
-    estimateCalculator.addTime(timeAmount);
+    output_stream.estimate(timeAmount);
 }
 
 void GCodeExport::writeMove(Point p, double speed, double extrusion_mm3_per_mm)
 {
     writeMove(p.X, p.Y, zPos, speed, extrusion_mm3_per_mm);
-    
-    output_stream.flush(); // TEMPORARY CODE!!
 }
 
 void GCodeExport::writeMove(Point3 p, double speed, double extrusion_mm3_per_mm)
 {
     writeMove(p.x, p.y, p.z, speed, extrusion_mm3_per_mm);
-    
-    output_stream.flush(); // TEMPORARY CODE!!
 }
 
 void GCodeExport::writeMove(int x, int y, int z, double speed, double extrusion_mm3_per_mm)
@@ -305,11 +297,11 @@ void GCodeExport::writeMove(int x, int y, int z, double speed, double extrusion_
                     {
                         *output_stream << "G1 F" << (retractionPrimeSpeed * 60) << " " << extruder_attr[current_extruder].extruderCharacter << std::setprecision(5) << extrusion_amount << "\n";
                     }
-                    estimateCalculator.plan(TimeEstimateCalculator::Position(INT2MM(currentPosition.x), INT2MM(currentPosition.y), INT2MM(currentPosition.z), extrusion_amount), 25.0);
+                    output_stream.estimate(TimeEstimateCalculator::Position(INT2MM(currentPosition.x), INT2MM(currentPosition.y), INT2MM(currentPosition.z), extrusion_amount), 25.0);
                 }else{
                     *output_stream << "G1 F" << (retractionPrimeSpeed * 60) << " " << extruder_attr[current_extruder].extruderCharacter << std::setprecision(5) << extrusion_amount << "\n";
                     currentSpeed = retractionPrimeSpeed;
-                    estimateCalculator.plan(TimeEstimateCalculator::Position(INT2MM(currentPosition.x), INT2MM(currentPosition.y), INT2MM(currentPosition.z), extrusion_amount), currentSpeed);
+                    output_stream.estimate(TimeEstimateCalculator::Position(INT2MM(currentPosition.x), INT2MM(currentPosition.y), INT2MM(currentPosition.z), extrusion_amount), currentSpeed);
                 }
                 if (getExtrusionAmountMM3(current_extruder) > 10000.0) //According to https://github.com/Ultimaker/CuraEngine/issues/14 having more then 21m of extrusion causes inaccuracies. So reset it every 10m, just to be sure.
                     resetExtrusionValue();
@@ -320,7 +312,7 @@ void GCodeExport::writeMove(int x, int y, int z, double speed, double extrusion_
                 if (last_coasted_amount_mm3 > 0)
                 {
                     *output_stream << "G1 F" << (retractionPrimeSpeed * 60) << " " << extruder_attr[current_extruder].extruderCharacter << std::setprecision(5) << extrusion_amount << "\n";
-                    estimateCalculator.plan(TimeEstimateCalculator::Position(INT2MM(currentPosition.x), INT2MM(currentPosition.y), INT2MM(currentPosition.z), extrusion_amount), currentSpeed);
+                    output_stream.estimate(TimeEstimateCalculator::Position(INT2MM(currentPosition.x), INT2MM(currentPosition.y), INT2MM(currentPosition.z), extrusion_amount), currentSpeed);
                 }
             }
             last_coasted_amount_mm3 = 0;
@@ -357,7 +349,7 @@ void GCodeExport::writeMove(int x, int y, int z, double speed, double extrusion_
     
     currentPosition = Point3(x, y, z);
     startPosition = currentPosition;
-    estimateCalculator.plan(TimeEstimateCalculator::Position(INT2MM(currentPosition.x), INT2MM(currentPosition.y), INT2MM(currentPosition.z), extrusion_amount), speed);
+    output_stream.estimate(TimeEstimateCalculator::Position(INT2MM(currentPosition.x), INT2MM(currentPosition.y), INT2MM(currentPosition.z), extrusion_amount), speed);
 }
 
 void GCodeExport::writeRetraction(RetractionConfig* config, bool force)
@@ -384,11 +376,11 @@ void GCodeExport::writeRetraction(RetractionConfig* config, bool force)
         *output_stream << "G10\n";
         //Assume default UM2 retraction settings.
         double retraction_distance = 4.5;
-        estimateCalculator.plan(TimeEstimateCalculator::Position(INT2MM(currentPosition.x), INT2MM(currentPosition.y), INT2MM(currentPosition.z), extrusion_amount - retraction_distance), 25); // TODO: hardcoded values!
+        output_stream.estimate(TimeEstimateCalculator::Position(INT2MM(currentPosition.x), INT2MM(currentPosition.y), INT2MM(currentPosition.z), extrusion_amount - retraction_distance), 25); // TODO: hardcoded values!
     }else{
         *output_stream << "G1 F" << (config->speed * 60) << " " << extruder_attr[current_extruder].extruderCharacter << std::setprecision(5) << extrusion_amount - config->amount << "\n";
         currentSpeed = config->speed;
-        estimateCalculator.plan(TimeEstimateCalculator::Position(INT2MM(currentPosition.x), INT2MM(currentPosition.y), INT2MM(currentPosition.z), extrusion_amount - config->amount), currentSpeed);
+        output_stream.estimate(TimeEstimateCalculator::Position(INT2MM(currentPosition.x), INT2MM(currentPosition.y), INT2MM(currentPosition.z), extrusion_amount - config->amount), currentSpeed);
     }
     if (config->zHop > 0)
     {

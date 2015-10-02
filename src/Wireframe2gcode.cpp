@@ -151,7 +151,7 @@ void Wireframe2gcode::writeGCode(CommandSocket* commandSocket)
     gcode.writeRetraction(&standard_retraction_config);
     
     
-    gcode.updateTotalPrintTime();
+    gcode.flush();
     
     gcode.writeDelay(0.3);
     

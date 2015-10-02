@@ -6,6 +6,9 @@
 
 namespace cura
 {
+
+class GcodeBlock; // forward declaration (GcodeBuffer includes timeEstimate, so this is to prevent a circular dependency)
+
     
 /*!
  *  The TimeEstimateCalculator class generates a estimate of printing time calculated with acceleration in mind.
@@ -51,35 +54,63 @@ public:
         double acceleration;
         Position delta;
         Position absDelta;
+        
+        Block()
+        : recalculate_flag(0)
+        , accelerate_until(0)
+        , decelerate_after(0)
+        , initial_feedrate(0)
+        , final_feedrate(0)
+        , entry_speed(0)
+        , max_entry_speed(0)
+        , nominal_length_flag(0)
+        , nominal_feedrate(0)
+        , maxTravel(0)
+        , distance(0)
+        , acceleration(0)
+        { }
     };
 
 private:
-    double extra_time;
     
     Position previous_feedrate;
     double previous_nominal_feedrate;
 
     Position currentPosition;
 
-    std::vector<Block> blocks;
+    std::vector<GcodeBlock*>& gcode_blocks;
+    
 public:
-    TimeEstimateCalculator()
-    : extra_time(0.0)
+    TimeEstimateCalculator(std::vector<GcodeBlock*>& gcode_blocks)
+    : gcode_blocks(gcode_blocks)
     {
     }
      
     void setPosition(Position newPos);
-    void plan(Position newPos, double feedRate);
-    void addTime(double time);
-    void reset();
     
+    /*!
+     * Plan a move to a new position with a given speed, resulting in a time estimation block
+     * 
+     * \param newPos The position to move to
+     * \param feedrate The speed with which to move
+     * \param result (output) The resulting time estimation block (if any)
+     * \return whether the move results in an actual move. Whether @p result should be used.
+     */
+    bool plan(Position& newPos, double feedRate, Block& result);
+    
+    /*!
+     * Calculate the time each gcode block takes and return the total time the gcode in the buffer takes.
+     * Stores each time estimate in each GcodeBlock.
+     * 
+     * \return The estimated total time it takes to print all the gcode currently in the buffer.
+     */
     double calculate();
 private:
     void reverse_pass();
     void forward_pass();
     void recalculate_trapezoids();
     
-    void calculate_trapezoid_for_block(Block *block, double entry_factor, double exit_factor);
+    void calculate_trapezoid_for_block(Block& block, double entry_factor, double exit_factor);
     void planner_reverse_pass_kernel(Block *previous, Block *current, Block *next);
     void planner_forward_pass_kernel(Block *previous, Block *current, Block *next);
 };

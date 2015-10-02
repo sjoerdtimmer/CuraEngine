@@ -3,6 +3,9 @@
 #include <string.h>
 #include <algorithm>
 #include "timeEstimate.h"
+#include "utils/logoutput.h"
+
+#include "GcodeBuffer.h"
 
 namespace cura
 {
@@ -22,18 +25,6 @@ template<typename T> const T square(const T& a) { return a * a; }
 void TimeEstimateCalculator::setPosition(Position newPos)
 {
     currentPosition = newPos;
-}
-
-void TimeEstimateCalculator::addTime(double time)
-{
-    extra_time += time;
-}
-
-
-void TimeEstimateCalculator::reset()
-{
-    extra_time = 0.0;
-    blocks.clear();
 }
 
 // Calculates the maximum allowable speed at this point when you must be able to reach target_velocity using the 
@@ -70,40 +61,37 @@ static inline double acceleration_time_from_distance(double initial_feedrate, do
 }
 
 // Calculates trapezoid parameters so that the entry- and exit-speed is compensated by the provided factors.
-void TimeEstimateCalculator::calculate_trapezoid_for_block(Block *block, double entry_factor, double exit_factor)
+void TimeEstimateCalculator::calculate_trapezoid_for_block(Block& block, double entry_factor, double exit_factor)
 {
-    double initial_feedrate = block->nominal_feedrate*entry_factor;
-    double final_feedrate = block->nominal_feedrate*exit_factor;
+    double initial_feedrate = block.nominal_feedrate*entry_factor;
+    double final_feedrate = block.nominal_feedrate*exit_factor;
 
-    double acceleration = block->acceleration;
-    double accelerate_distance = estimate_acceleration_distance(initial_feedrate, block->nominal_feedrate, acceleration);
-    double decelerate_distance = estimate_acceleration_distance(block->nominal_feedrate, final_feedrate, -acceleration);
+    double acceleration = block.acceleration;
+    double accelerate_distance = estimate_acceleration_distance(initial_feedrate, block.nominal_feedrate, acceleration);
+    double decelerate_distance = estimate_acceleration_distance(block.nominal_feedrate, final_feedrate, -acceleration);
 
     // Calculate the size of Plateau of Nominal Rate.
-    double plateau_distance = block->distance-accelerate_distance - decelerate_distance;
+    double plateau_distance = block.distance-accelerate_distance - decelerate_distance;
 
     // Is the Plateau of Nominal Rate smaller than nothing? That means no cruising, and we will
     // have to use intersection_distance() to calculate when to abort acceleration and start braking
     // in order to reach the final_rate exactly at the end of this block.
     if (plateau_distance < 0)
     {
-        accelerate_distance = intersection_distance(initial_feedrate, final_feedrate, acceleration, block->distance);
+        accelerate_distance = intersection_distance(initial_feedrate, final_feedrate, acceleration, block.distance);
         accelerate_distance = std::max(accelerate_distance, 0.0); // Check limits due to numerical round-off
-        accelerate_distance = std::min(accelerate_distance, block->distance);//(We can cast here to unsigned, because the above line ensures that we are above zero)
+        accelerate_distance = std::min(accelerate_distance, block.distance);//(We can cast here to unsigned, because the above line ensures that we are above zero)
         plateau_distance = 0;
     }
 
-    block->accelerate_until = accelerate_distance;
-    block->decelerate_after = accelerate_distance+plateau_distance;
-    block->initial_feedrate = initial_feedrate;
-    block->final_feedrate = final_feedrate;
-}                    
+    block.accelerate_until = accelerate_distance;
+    block.decelerate_after = accelerate_distance+plateau_distance;
+    block.initial_feedrate = initial_feedrate;
+    block.final_feedrate = final_feedrate;
+}
 
-void TimeEstimateCalculator::plan(Position newPos, double feedrate)
+bool TimeEstimateCalculator::plan(Position& newPos, double feedrate, Block& block)
 {
-    Block block;
-    memset(&block, 0, sizeof(block));
-    
     block.maxTravel = 0;
     for(unsigned int n=0; n<NUM_AXIS; n++)
     {
@@ -112,7 +100,7 @@ void TimeEstimateCalculator::plan(Position newPos, double feedrate)
         block.maxTravel = std::max(block.maxTravel, block.absDelta[n]);
     }
     if (block.maxTravel <= 0)
-        return;
+        return false;
     if (feedrate < minimumfeedrate)
         feedrate = minimumfeedrate;
     block.distance = sqrtf(square(block.absDelta[0]) + square(block.absDelta[1]) + square(block.absDelta[2]));
@@ -158,7 +146,7 @@ void TimeEstimateCalculator::plan(Position newPos, double feedrate)
     vmax_junction = std::min(vmax_junction, block.nominal_feedrate);
     double safe_speed = vmax_junction;
     
-    if ((blocks.size() > 0) && (previous_nominal_feedrate > 0.0001))
+    if ((gcode_blocks.size() > 0) && (previous_nominal_feedrate > 0.0001))
     {
         double xy_jerk = sqrt(square(current_feedrate[X_AXIS]-previous_feedrate[X_AXIS])+square(current_feedrate[Y_AXIS]-previous_feedrate[Y_AXIS]));
         vmax_junction = block.nominal_feedrate;
@@ -186,9 +174,9 @@ void TimeEstimateCalculator::plan(Position newPos, double feedrate)
 
     currentPosition = newPos;
 
-    calculate_trapezoid_for_block(&block, block.entry_speed/block.nominal_feedrate, safe_speed/block.nominal_feedrate);
+    calculate_trapezoid_for_block(block, block.entry_speed/block.nominal_feedrate, safe_speed/block.nominal_feedrate);
     
-    blocks.push_back(block);
+    return true;
 }
 
 double TimeEstimateCalculator::calculate()
@@ -197,15 +185,30 @@ double TimeEstimateCalculator::calculate()
     forward_pass();
     recalculate_trapezoids();
     
-    double totalTime = extra_time;
-    for(unsigned int n=0; n<blocks.size(); n++)
+    double totalTime = 0.0;
+    for(GcodeBlock* gcode_block : gcode_blocks)
     {
-        Block& block = blocks[n];
+        if (gcode_block->time != 0.0) 
+        { 
+            totalTime += gcode_block->time;
+            continue; 
+        }
+        Block& block = gcode_block->time_block;
         double plateau_distance = block.decelerate_after - block.accelerate_until;
         
-        totalTime += acceleration_time_from_distance(block.initial_feedrate, block.accelerate_until, block.acceleration);
-        totalTime += plateau_distance / block.nominal_feedrate;
-        totalTime += acceleration_time_from_distance(block.final_feedrate, (block.distance - block.decelerate_after), block.acceleration);
+        assert(gcode_block->time == 0.0);
+        gcode_block->time = acceleration_time_from_distance(block.initial_feedrate, block.accelerate_until, block.acceleration);
+        gcode_block->time += plateau_distance / block.nominal_feedrate;
+        gcode_block->time += acceleration_time_from_distance(block.final_feedrate, (block.distance - block.decelerate_after), block.acceleration);
+        totalTime += gcode_block->time;
+        
+        logError("%f\n", gcode_block->time);
+        if (isnan(totalTime))
+        {
+            std::cerr << ">>>> " << gcode_block->str() << std::endl;
+            logError("total print time is NaN!!");
+            
+        }
     }
     return totalTime;
 }
@@ -237,11 +240,13 @@ void TimeEstimateCalculator::planner_reverse_pass_kernel(Block *previous, Block 
 void TimeEstimateCalculator::reverse_pass()
 {
     Block* block[3] = {nullptr, nullptr, nullptr};
-    for(unsigned int n=blocks.size()-1; int(n)>=0; n--)
+
+    for(GcodeBlock* gcode_block : gcode_blocks)
     {
+        if (gcode_block->time != 0.0) { continue; }
         block[2]= block[1];
         block[1]= block[0];
-        block[0] = &blocks[n];
+        block[0] = &gcode_block->time_block;
         planner_reverse_pass_kernel(block[0], block[1], block[2]);
     }
 }
@@ -276,11 +281,12 @@ void TimeEstimateCalculator::planner_forward_pass_kernel(Block *previous, Block 
 void TimeEstimateCalculator::forward_pass()
 {
     Block* block[3] = {nullptr, nullptr, nullptr};
-    for(unsigned int n=0; n<blocks.size(); n++)
+    for(GcodeBlock* gcode_block : gcode_blocks)
     {
+        if (gcode_block->time != 0.0) { continue; }
         block[0]= block[1];
         block[1]= block[2];
-        block[2] = &blocks[n];
+        block[2] = &gcode_block->time_block;
         planner_forward_pass_kernel(block[0], block[1], block[2]);
     }
     planner_forward_pass_kernel(block[1], block[2], nullptr);
@@ -294,17 +300,19 @@ void TimeEstimateCalculator::recalculate_trapezoids()
     Block *current;
     Block *next = nullptr;
 
-    for(unsigned int n=0; n<blocks.size(); n--)
+
+    for(GcodeBlock* gcode_block : gcode_blocks)
     {
+        if (gcode_block->time != 0.0) { continue; }
         current = next;
-        next = &blocks[n];
+        next = &gcode_block->time_block;
         if (current)
         {
             // Recalculate if current block entry or exit junction speed has changed.
             if (current->recalculate_flag || next->recalculate_flag)
             {
                 // NOTE: Entry and exit factors always > 0 by all previous logic operations.
-                calculate_trapezoid_for_block(current, current->entry_speed/current->nominal_feedrate, next->entry_speed/current->nominal_feedrate);
+                calculate_trapezoid_for_block(*current, current->entry_speed/current->nominal_feedrate, next->entry_speed/current->nominal_feedrate);
                 current->recalculate_flag = false; // Reset current only to ensure next trapezoid is computed
             }
         }
@@ -312,7 +320,7 @@ void TimeEstimateCalculator::recalculate_trapezoids()
     // Last/newest block in buffer. Exit speed is set with MINIMUM_PLANNER_SPEED. Always recalculated.
     if(next != nullptr)
     {
-        calculate_trapezoid_for_block(next, next->entry_speed/next->nominal_feedrate, MINIMUM_PLANNER_SPEED/next->nominal_feedrate);
+        calculate_trapezoid_for_block(*next, next->entry_speed/next->nominal_feedrate, MINIMUM_PLANNER_SPEED/next->nominal_feedrate);
         next->recalculate_flag = false;
     }
 }
