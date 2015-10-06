@@ -199,13 +199,19 @@ void FffGcodeWriter::processStartingCode(SliceDataStorage& storage)
     {
         if (getSettingBoolean("machine_heated_bed") && getSettingInDegreeCelsius("material_bed_temperature") > 0)
             gcode.writeBedTemperatureCommand(getSettingInDegreeCelsius("material_bed_temperature"), true);
-        
-        for(SliceMeshStorage& mesh : storage.meshes)
-            if (mesh.getSettingInDegreeCelsius("material_print_temperature") > 0)
-                gcode.writeTemperatureCommand(mesh.getSettingAsIndex("extruder_nr"), mesh.getSettingInDegreeCelsius("material_print_temperature"));
-        for(SliceMeshStorage& mesh : storage.meshes)
-            if (mesh.getSettingInDegreeCelsius("material_print_temperature") > 0)
-                gcode.writeTemperatureCommand(mesh.getSettingAsIndex("extruder_nr"), mesh.getSettingInDegreeCelsius("material_print_temperature"), true);
+
+        for(int i = 0; i < storage.meshgroup->getExtruderCount(); ++i)
+        {
+            auto extruder = storage.meshgroup->getExtruderTrain(i);
+            gcode.writeTemperatureCommand(i, extruder->getSettingInDegreeCelsius("material_print_temperature"), true);
+        }
+
+//         for(SliceMeshStorage& mesh : storage.meshes)
+//             if (mesh.getSettingInDegreeCelsius("material_print_temperature") > 0)
+//                 gcode.writeTemperatureCommand(mesh.getSettingAsIndex("extruder_nr"), mesh.getSettingInDegreeCelsius("material_print_temperature"));
+//         for(SliceMeshStorage& mesh : storage.meshes)
+//             if (mesh.getSettingInDegreeCelsius("material_print_temperature") > 0)
+//                 gcode.writeTemperatureCommand(mesh.getSettingAsIndex("extruder_nr"), mesh.getSettingInDegreeCelsius("material_print_temperature"), true);
     }
     
     gcode.writeCode(getSettingString("machine_start_gcode").c_str());

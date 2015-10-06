@@ -54,6 +54,8 @@ public:
     
     // Print object that olds one or more meshes that need to be sliced. 
     std::vector< std::shared_ptr<MeshGroup> > objects_to_slice;
+
+    std::unordered_map<int, std::vector<std::pair<std::string, std::string>>> extruder_overrides;
 };
 
 CommandSocket::CommandSocket()
@@ -176,12 +178,25 @@ void CommandSocket::handleObjectList(cura::proto::ObjectList* list)
         object_to_slice->setSetting(setting.name(), setting.value());
     }
 
+    for(auto itr = d->extruder_overrides.begin(); itr != d->extruder_overrides.end(); ++itr)
+    {
+        ExtruderTrain* train = object_to_slice->getExtruderTrain(itr->first);
+        if(!train)
+            continue;
+
+        for(auto pair : itr->second)
+        {
+            train->setSetting(pair.first, pair.second);
+        }
+    }
+
     d->object_count++;
     object_to_slice->finalize();
 }
 
 void CommandSocket::handleSettingList(cura::proto::SettingList* list)
 {
+    d->extruder_overrides.clear();
     for(auto setting : list->settings())
     {
         // Temporary hack to make setting temperature per extruder possible
@@ -198,20 +213,12 @@ void CommandSocket::handleSettingList(cura::proto::SettingList* list)
                 auto extruder_train = extruder_trains->getChild(extruder_nr);
                 if(extruder_train)
                 {
-                    for(auto child : extruder_train->getChildren())
-                    {
-                        if(child.getKey().find(name))
-                        {
-                            logWarning("Set Setting %s to %s for extruder %i", name.c_str(), setting.value().c_str(), extruder_nr);
-                            child.setDefault(setting.value());
-                            continue;
-                        }
-                    }
+                    if(d->extruder_overrides.find(extruder_nr) == d->extruder_overrides.end())
+                        d->extruder_overrides[extruder_nr] = std::vector<std::pair<std::string, std::string>>();
+
+                    d->extruder_overrides[extruder_nr].push_back(std::pair<std::string, std::string>(name, setting.value()));
+                    continue;
                 }
-            }
-            else
-            {
-                logWarning("No extruder trains");
             }
         }
 
