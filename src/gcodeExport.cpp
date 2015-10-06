@@ -157,6 +157,18 @@ void GCodeExport::resetTotalPrintTimeAndFilament()
 
 void GCodeExport::flush()
 {
+    gcode_buffer.estimate_times();
+    double layer_time = gcode_buffer.getBufferPrintTime();
+    if (layer_time > 10) // TODO: this is a debug test!
+    {
+        std::stringstream& insertt = gcode_buffer.insert(5.0, true);
+        insertt << "; 5 seconds before layer end\n";
+    }
+    else 
+    {  
+        std::stringstream& insertt = gcode_buffer.insert(gcode_buffer.getBufferPrintTime() / 2, true);
+        insertt << "; middle of layer\n";
+    }
     gcode_buffer.flush();
 }
 

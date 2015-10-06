@@ -48,14 +48,15 @@ class GcodeBuffer
     
     class Insert : public std::stringstream
     {
-        unsigned int pos; //!< position of the item in GcodeBuffer::gcode_blocks before which to insert gcode of this Insert
+        friend class GcodeBuffer;
+        unsigned int pos; //!< position of the item in GcodeBuffer::gcode_blocks. At first this signifies where it was called, later it will be where it should be inserted into the gcode
+        double time;
+        bool before;
     public:
-        unsigned int getPos() const 
-        { 
-            return pos; 
-        }
-        Insert(unsigned int pos) 
+        Insert(unsigned int pos, double time, bool before) 
         : pos(pos) 
+        , time(time)
+        , before(before)
         { 
             *this << std::fixed;
         }
@@ -67,15 +68,17 @@ class GcodeBuffer
     
     double totalPrintTime; //!< The total print time of the whole print
     
-    double total_time; // the total amount of time it takes to print all gcode currently in this buffer
+    double buffer_time; // the total amount of time it takes to print all gcode currently in this buffer
     
     std::list<Insert> inserts; // comands to be inserted in the gcode when writing it to file/commandSocket
     
     std::ostream* output_stream;
+    
+    void order_inserts();
 public:
     GcodeBuffer()
     : estimateCalculator(gcode_blocks)
-    , total_time(0.0)
+    , buffer_time(0.0)
     , output_stream(&std::cout)
     { 
         gcode_blocks.push_back(new GcodeBlock());
@@ -87,15 +90,15 @@ public:
         return totalPrintTime;
     }
 
+    double getBufferPrintTime()
+    {
+        return buffer_time;
+    }
+    
     void resetTotalPrintTime()
     {
         totalPrintTime = 0;
         assert(gcode_blocks.size() == 1); // this should never be called. The gcode_blocks should already be empty due to the last flush of the previous slicing! (The buffer always contains one block)
-    }
-    
-    GcodeBuffer& operator*() 
-    {
-        return *this;
     }
     
     void setOutputStream(std::ostream* stream)
@@ -129,6 +132,8 @@ public:
      * \return An insert to which gcode can be written.
      */
     std::stringstream& insert(double time, bool before);
+    
+    void estimate_times();
     
     /*!
      * Flush the content of the buffer, including the inserts.
