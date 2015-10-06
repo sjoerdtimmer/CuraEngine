@@ -3,6 +3,8 @@
 #include "FffProcessor.h"
 #include "Progress.h"
 
+#include "settingRegistry.h"
+
 #include <thread>
 #include <cinttypes>
 
@@ -182,6 +184,37 @@ void CommandSocket::handleSettingList(cura::proto::SettingList* list)
 {
     for(auto setting : list->settings())
     {
+        // Temporary hack to make setting temperature per extruder possible
+        auto name = setting.name();
+        if(name.find("extruder_0") != std::string::npos || name.find("extruder_1") != std::string::npos)
+        {
+            name = name.substr(9);
+            auto extruder_nr = std::stoi(name.substr(0, name.find('_')));
+            name = name.substr(name.find('_') + 1);
+
+            auto extruder_trains = cura::SettingRegistry::getInstance()->getCategory("machine_extruder_trains");
+            if(extruder_trains)
+            {
+                auto extruder_train = extruder_trains->getChild(extruder_nr);
+                if(extruder_train)
+                {
+                    for(auto child : extruder_train->getChildren())
+                    {
+                        if(child.getKey().find(name))
+                        {
+                            logWarning("Set Setting %s to %s for extruder %i", name.c_str(), setting.value().c_str(), extruder_nr);
+                            child.setDefault(setting.value());
+                            continue;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                logWarning("No extruder trains");
+            }
+        }
+
         FffProcessor::getInstance()->setSetting(setting.name(), setting.value());
     }
 }
