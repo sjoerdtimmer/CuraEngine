@@ -302,7 +302,8 @@ void LinePolygonsCrossings::getCombingPath(CombPath& combPath, int64_t max_comb_
     
     CombPath basicPath;
     getBasicCombingPath(basicPath);
-    optimizePath(basicPath, combPath);
+//     optimizePath(basicPath, combPath);
+    combPath = basicPath; // TODO TEMP!! remove line!!
 }
 
 

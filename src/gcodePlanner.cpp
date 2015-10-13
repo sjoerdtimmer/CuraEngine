@@ -111,6 +111,9 @@ void GCodePlanner::moveInsideCombBoundary(int distance)
 
 void GCodePlanner::addTravel(Point p)
 {
+    if (vSize(p - Point(113869, 121072)) < 20)
+        std::cerr << p.X << ", " << p.Y << std::endl;
+    
     GCodePath* path = nullptr;
     
     bool combed = false;
