@@ -209,7 +209,7 @@ public:
     Point3 getPosition();
     
     Point getPositionXY();
-
+    
     int getPositionZ();
 
     int getExtruderNr();

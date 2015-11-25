@@ -7,45 +7,45 @@
 
 namespace cura
 {
-    class Infill 
+class Infill 
+{
+    EFillMethod pattern;
+    const Polygons& in_outline;
+    int outlineOffset;
+    bool avoidOverlappingPerimeters;
+    int extrusion_width;
+    int line_distance;
+    double infill_overlap;
+    double fill_angle;
+    bool connect_zigzags;
+    bool use_endPieces;
+
+public:
+    Infill(EFillMethod pattern, const Polygons& in_outline, int outlineOffset, bool avoidOverlappingPerimeters, int extrusion_width, int line_distance, double infill_overlap, double fill_angle, bool connect_zigzags, bool use_endPieces)
+    : pattern(pattern)
+    , in_outline(in_outline)
+    , outlineOffset(outlineOffset)
+    , avoidOverlappingPerimeters(avoidOverlappingPerimeters)
+    , extrusion_width(extrusion_width)
+    , line_distance(line_distance)
+    , infill_overlap(infill_overlap)
+    , fill_angle(fill_angle)
+    , connect_zigzags(connect_zigzags)
+    , use_endPieces(use_endPieces)
     {
-        EFillMethod pattern;
-        const Polygons& in_outline;
-        int outlineOffset;
-        bool avoidOverlappingPerimeters;
-        int extrusion_width;
-        int line_distance;
-        double infill_overlap;
-        double fill_angle;
-        bool connect_zigzags;
-        bool use_endPieces;
+    }
+    void generate(Polygons& result_polygons, Polygons& result_lines, Polygons* in_between);
+};
+    
+void generateInfill(EFillMethod pattern, const Polygons& in_outline, int outlineOffset, Polygons& result_polygons, Polygons& result_lines, Polygons* in_between, bool avoidOverlappingPerimeters, int extrusion_width, int line_distance, double infill_overlap, double fill_angle, bool connect_zigzags, bool use_endPieces);
 
-    public:
-        Infill(EFillMethod pattern, const Polygons& in_outline, int outlineOffset, bool avoidOverlappingPerimeters, int extrusion_width, int line_distance, double infill_overlap, double fill_angle, bool connect_zigzags, bool use_endPieces)
-        : pattern(pattern)
-        , in_outline(in_outline)
-        , outlineOffset(outlineOffset)
-        , avoidOverlappingPerimeters(avoidOverlappingPerimeters)
-        , extrusion_width(extrusion_width)
-        , line_distance(line_distance)
-        , infill_overlap(infill_overlap)
-        , fill_angle(fill_angle)
-        , connect_zigzags(connect_zigzags)
-        , use_endPieces(use_endPieces)
-        {
-        }
-        void generate(Polygons& result_polygons, Polygons& result_lines, Polygons* in_between);
-    };
+void generateConcentricInfill(Polygons outline, Polygons& result, int inset_value);
 
-    void generateInfill(EFillMethod pattern, const Polygons& in_outline, int outlineOffset, Polygons& result_polygons, Polygons& result_lines, Polygons* in_between, bool avoidOverlappingPerimeters, int extrusion_width, int line_distance, double infill_overlap, double fill_angle, bool connect_zigzags, bool use_endPieces);
+void generateConcentricInfillDense(Polygons outline, Polygons& result, Polygons* in_between, int extrusionWidth, bool avoidOverlappingPerimeters);
 
-    void generateConcentricInfill(Polygons outline, Polygons& result, int inset_value);
+void generateGridInfill(const Polygons& in_outline, int outlineOffset, Polygons& result, int extrusionWidth, int lineSpacing, double infillOverlap, double rotation);
 
-    void generateConcentricInfillDense(Polygons outline, Polygons& result, Polygons* in_between, int extrusionWidth, bool avoidOverlappingPerimeters);
-
-    void generateGridInfill(const Polygons& in_outline, int outlineOffset, Polygons& result, int extrusionWidth, int lineSpacing, double infillOverlap, double rotation);
-
-    void generateTriangleInfill(const Polygons& in_outline, int outlineOffset, Polygons& result, int extrusionWidth, int lineSpacing, double infillOverlap, double rotation);
+void generateTriangleInfill(const Polygons& in_outline, int outlineOffset, Polygons& result, int extrusionWidth, int lineSpacing, double infillOverlap, double rotation);
 
     /*!
      * generate lines within the area of \p in_outline, at regular intervals of \p lineSpacing
@@ -65,9 +65,9 @@ namespace cura
      *      and connect them using the even-odd rule
      * 
      */
-    void generateLineInfill(const Polygons& in_outline, int outlineOffset, Polygons& result, int extrusionWidth, int lineSpacing, double infillOverlap, double rotation);
+void generateLineInfill(const Polygons& in_outline, int outlineOffset, Polygons& result, int extrusionWidth, int lineSpacing, double infillOverlap, double rotation);
 
-    void generateZigZagInfill(const Polygons& in_outline, Polygons& result, int extrusionWidth, int lineSpacing, double infillOverlap, double rotation, bool connect_zigzags, bool use_endPieces);
+void generateZigZagInfill(const Polygons& in_outline, Polygons& result, int extrusionWidth, int lineSpacing, double infillOverlap, double rotation, bool connect_zigzags, bool use_endPieces);
 
     /*!
      * adapted from generateLineInfill(.)
@@ -118,9 +118,9 @@ namespace cura
      *   ^     ^     ^    scanlines
      *                 ^  disconnected end piece
      */
-    void generateZigZagIninfill_endPieces(const Polygons& in_outline, Polygons& result, int extrusionWidth, int lineSpacing, double infillOverlap, double rotation, bool connect_zigzags);
+void generateZigZagIninfill_endPieces(const Polygons& in_outline, Polygons& result, int extrusionWidth, int lineSpacing, double infillOverlap, double rotation, bool connect_zigzags);
 
-    void generateZigZagIninfill_noEndPieces(const Polygons& in_outline, Polygons& result, int extrusionWidth, int lineSpacing, double infillOverlap, double rotation);
+void generateZigZagIninfill_noEndPieces(const Polygons& in_outline, Polygons& result, int extrusionWidth, int lineSpacing, double infillOverlap, double rotation);
 }//namespace cura
 
 #endif//INFILL_H

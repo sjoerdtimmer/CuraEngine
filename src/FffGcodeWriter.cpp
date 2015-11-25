@@ -71,7 +71,7 @@ void FffGcodeWriter::writeGCode(SliceDataStorage& storage, TimeKeeper& time_keep
     {
         processLayer(storage, layer_nr, total_layers, has_raft);
     }
-    
+
     Progress::messageProgressStage(Progress::Stage::FINISH, &time_keeper, command_socket);
 
     //Store the object height for when we are printing multiple objects, as we need to clear every one of them when moving to the next position.
@@ -361,7 +361,7 @@ void FffGcodeWriter::processLayer(SliceDataStorage& storage, unsigned int layer_
     int64_t comb_offset_from_outlines = storage.meshgroup->getExtruderTrain(current_extruder_planned)->getSettingInMicrons("machine_nozzle_size") * 2; // TODO: only used when there is no second wall.
     int64_t z = storage.meshes[0].layers[layer_nr].printZ;
     GCodePlanner& gcode_layer = layer_plan_buffer.emplace_back(command_socket, storage, layer_nr, z, layer_thickness, last_position_planned, current_extruder_planned, fan_speed_layer_time_settings, getSettingBoolean("retraction_combing"), comb_offset_from_outlines, getSettingBoolean("travel_avoid_other_parts"), getSettingInMicrons("travel_avoid_distance"));
-    
+
     if (layer_nr == 0)
     {
         int start_extruder = 0; // TODO: make settable
