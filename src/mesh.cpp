@@ -17,9 +17,25 @@ Mesh::Mesh(SettingsBaseVirtual* parent)
 
 void Mesh::addFace(Point3& v0, Point3& v1, Point3& v2)
 {
-    int vi0 = findIndexOfVertex(v0);
-    int vi1 = findIndexOfVertex(v1);
-    int vi2 = findIndexOfVertex(v2);
+    int vi0, vi1, vi2;
+    if (getSettingBoolean("voxelate_enable"))
+    {
+        int voxel_size = getSettingInMicrons("voxelate_size");
+        
+        Point3 v0_ = v0 / voxel_size * voxel_size;
+        Point3 v1_ = v1 / voxel_size * voxel_size;
+        Point3 v2_ = v2 / voxel_size * voxel_size;
+        
+        vi0 = findIndexOfVertex(v0_);
+        vi1 = findIndexOfVertex(v1_);
+        vi2 = findIndexOfVertex(v2_);
+    }
+    else 
+    {
+        vi0 = findIndexOfVertex(v0);
+        vi1 = findIndexOfVertex(v1);
+        vi2 = findIndexOfVertex(v2);
+    }
     if (vi0 == vi1 || vi1 == vi2 || vi0 == vi2) return; // the face has two vertices which get assigned the same location. Don't add the face.
 
     int idx = faces.size(); // index of face to be added
