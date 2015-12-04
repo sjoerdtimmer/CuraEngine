@@ -310,6 +310,10 @@ void SlicerLayer::makePolygons(Mesh* mesh, bool keep_none_closed, bool extensive
     polygonList.removeDegenerateVerts(); // remove verts connected to overlapping line segments
     
     int xy_offset = mesh->getSettingInMicrons("xy_offset");
+    if (mesh->getSettingBoolean("wavy_enabled"))
+    {
+        xy_offset += std::sin(2.0 * M_PI * double(z) / double(mesh->getSettingInMicrons("wavy_wave_length"))) * mesh->getSettingInMicrons("wavy_amplitude");
+    }
     if (xy_offset != 0)
     {
         polygonList = polygonList.offset(xy_offset);
