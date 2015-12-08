@@ -8,6 +8,7 @@
 
 #include "settings.h"
 #include "utils/intpoint.h"
+#include "utils/NoCopy.h"
 #include "timeEstimate.h"
 #include "MeshGroup.h"
 #include "commandSocket.h"
@@ -17,13 +18,9 @@ namespace cura {
 struct CoastingConfig
 {
     bool coasting_enable; 
-    double coasting_volume_move; 
-    double coasting_speed_move; 
-    double coasting_min_volume_move; 
-
-    double coasting_volume_retract;
-    double coasting_speed_retract;
-    double coasting_min_volume_retract;
+    double coasting_volume; 
+    double coasting_speed; 
+    double coasting_min_volume; 
 };
     
 class RetractionConfig
@@ -43,7 +40,8 @@ public:
 class GCodePathConfig
 {
 private:
-    double speed; //!< movement speed (mm/s)
+    double speed_iconic; //!< movement speed (mm/s) specific to this print feature
+    double speed; //!< current movement speed (mm/s) (modified by layer_nr etc.)
     int line_width; //!< width of the line extruded
     double flow; //!< extrusion flow in %
     int layer_thickness; //!< layer height
@@ -54,7 +52,7 @@ public:
     RetractionConfig *const retraction_config;
     
     // GCodePathConfig() : speed(0), line_width(0), extrusion_mm3_per_mm(0.0), name(nullptr), spiralize(false), retraction_config(nullptr) {}
-    GCodePathConfig(RetractionConfig* retraction_config, const char* name) : speed(0), line_width(0), extrusion_mm3_per_mm(0.0), name(name), spiralize(false), retraction_config(retraction_config) {}
+    GCodePathConfig(RetractionConfig* retraction_config, const char* name) : speed_iconic(0), speed(0), line_width(0), extrusion_mm3_per_mm(0.0), name(name), spiralize(false), retraction_config(retraction_config) {}
     
     /*!
      * Initialize some of the member variables.
@@ -63,6 +61,7 @@ public:
      */
     void init(double speed, int line_width, double flow)
     {
+        speed_iconic = speed;
         this->speed = speed;
         this->line_width = line_width;
         this->flow = flow;
@@ -77,9 +76,18 @@ public:
         calculateExtrusion();
     }
     
+    /*!
+     * Set the speed to somewhere between the @p min_speed and the speed_iconic.
+     * 
+     * This functions should not be called with @p layer_nr > @p max_speed_layer !
+     * 
+     * \param min_speed The speed at layer zero
+     * \param layer_nr The layer number 
+     * \param max_speed_layer The layer number for which the speed_iconic should be used.
+     */
     void smoothSpeed(double min_speed, int layer_nr, double max_speed_layer) 
     {
-        speed = (speed*layer_nr)/max_speed_layer + (min_speed*(max_speed_layer-layer_nr)/max_speed_layer);
+        speed = (speed_iconic*layer_nr)/max_speed_layer + (min_speed*(max_speed_layer-layer_nr)/max_speed_layer);
     }
 
     /*!
@@ -117,7 +125,7 @@ private:
 
 //The GCodeExport class writes the actual GCode. This is the only class that knows how GCode looks and feels.
 //  Any customizations on GCodes flavors are done in this class.
-class GCodeExport
+class GCodeExport : public NoCopy
 {
 private:
     struct ExtruderTrainAttributes

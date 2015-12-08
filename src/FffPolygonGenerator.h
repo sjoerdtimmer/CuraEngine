@@ -4,6 +4,7 @@
 
 #include "MeshGroup.h"
 #include "utils/polygonUtils.h"
+#include "utils/NoCopy.h"
 #include "utils/gettime.h"
 #include "settings.h"
 #include "sliceDataStorage.h"
@@ -21,7 +22,7 @@ namespace cura
  * 
  * The main function of this class is FffPolygonGenerator::generateAreas().
  */
-class FffPolygonGenerator : public SettingsMessenger
+class FffPolygonGenerator : public SettingsMessenger, NoCopy
 {
 private:
     CommandSocket* commandSocket;
@@ -112,7 +113,7 @@ private:
      * \param storage Input and Output parameter: fetches the outline information (see SliceLayerPart::outline) and generates the other reachable field of the \p storage
      * \param layer_nr The layer for which to generate the skin areas.
      */
-    void processSkins(SliceDataStorage& storage, unsigned int layer_nr); 
+    void processSkinsAndInfill(SliceDataStorage& storage, unsigned int layer_nr); 
 
     /*!
      * Generate the polygons where the draft screen should be.

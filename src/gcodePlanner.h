@@ -101,23 +101,46 @@ public:
         material += other.material;
         return *this;
     }
-    double getTotalTime()
+    
+    /*!
+     * \brief Subtracts the specified estimates from these estimates and returns
+     * the result.
+     * 
+     * Each of the estimates in this class are individually subtracted.
+     * 
+     * \param other The estimates to subtract from these estimates.
+     * \return These estimates with the specified estimates subtracted.
+     */
+    TimeMaterialEstimates operator-(const TimeMaterialEstimates& other);
+    
+    /*!
+     * \brief Subtracts the specified elements from these estimates.
+     * 
+     * This causes the estimates in this instance to change. Each of the
+     * estimates in this class are individually subtracted.
+     * 
+     * \param other The estimates to subtract from these estimates.
+     * \return A reference to this instance.
+     */
+    TimeMaterialEstimates& operator-=(const TimeMaterialEstimates& other);
+    
+    double getTotalTime() const
     {
         return extrude_time + unretracted_travel_time + retracted_travel_time;
     }
-    double getTotalUnretractedTime()
+    double getTotalUnretractedTime() const
     {
         return extrude_time + unretracted_travel_time;
     }
-    double getTravelTime()
+    double getTravelTime() const
     {
         return retracted_travel_time + unretracted_travel_time;
     }
-    double getExtrudeTime()
+    double getExtrudeTime() const
     {
         return extrude_time;
     }
-    double getMaterial()
+    double getMaterial() const
     {
         return material;
     }
@@ -148,7 +171,7 @@ public:
     }
 };
 
-class ExtruderPlan 
+class ExtruderPlan
 {
 public:
     std::vector<GCodePath> paths;
@@ -207,7 +230,7 @@ class LayerPlanBuffer; // forward declaration to prevent circular dependency
  * It facilitates the combing to keep the head inside the print.
  * It also keeps track of the print time estimate for this planning so speed adjustments can be made for the minimal-layer-time.
  */
-class GCodePlanner
+class GCodePlanner : public NoCopy
 {
     friend class LayerPlanBuffer;
 private:
@@ -226,8 +249,9 @@ private:
     
     std::vector<ExtruderPlan> extruder_plans; //!< should always contain at least one ExtruderPlan
     
-    bool was_combing;
-    bool is_going_to_comb;
+    bool was_inside; //!< Whether the last planned (extrusion) move was inside a layer part
+    bool is_inside; //!< Whether the destination of the next planned travel move is inside a layer part
+    Polygons comb_boundary_inside; //!< The boundary within which to comb, or to move into when performing a retraction.
     Comb* comb;
 
     RetractionConfig* last_retraction_config;
@@ -235,7 +259,7 @@ private:
     FanSpeedLayerTimeSettings& fan_speed_layer_time_settings;
 
     double extrudeSpeedFactor;
-    double travelSpeedFactor; // TODO: remove this unused var?
+    double travelSpeedFactor;
     
     double fan_speed;
     
@@ -274,6 +298,14 @@ public:
     GCodePlanner(CommandSocket* commandSocket, SliceDataStorage& storage, unsigned int layer_nr, int z, int layer_height, Point last_position, int current_extruder, FanSpeedLayerTimeSettings& fan_speed_layer_time_settings, bool retraction_combing, int64_t comb_boundary_offset, bool travel_avoid_other_parts, int64_t travel_avoid_distance);
     ~GCodePlanner();
 
+private:
+    /*!
+     * Compute the boundary within which to comb, or to move into when performing a retraction.
+     * \return the comb_boundary_inside
+     */
+    Polygons computeCombBoundaryInside();
+
+public:
     int getLayerNr()
     {
         return layer_nr;
@@ -283,11 +315,20 @@ public:
     {
         return lastPosition;
     }
-    
-    void setCombing(bool going_to_comb);
+
+    /*!
+    * Set whether the next destination is inside a layer part or not.
+    * 
+    * Features like infill, walls, skin etc. are considered inside.
+    * Features like prime tower and support are considered outside.
+    */
+    void setIsInside(bool going_to_comb);
     
     bool setExtruder(int extruder);
 
+    /*!
+     * Get the last planned extruder.
+     */
     int getExtruder()
     {
         return extruder_plans.back().extruder;
@@ -397,35 +438,13 @@ public:
      * \param extruder_plan_idx The index of the current extruder plan
      * \param path_idx The index into GCodePlanner::paths for the next path to be written to GCode.
      * \param layerThickness The height of the current layer.
-     * \param coasting_volume_move The volume otherwise leaked during a normal move.
-     * \param coasting_speed_move The speed at which to move during move-coasting.
-     * \param coasting_min_volume_move The minimal volume a path should have which builds up enough pressure to ooze as much as \p coasting_volume_move.
-     * \param coasting_volume_retract The volume otherwise leaked during a retract move.
-     * \param coasting_speed_retract The speed at which to move during retract-coasting.
-     * \param coasting_min_volume_retract The minimal volume a path should have which builds up enough pressure to ooze as much as \p coasting_volume_retract.
-     * \return Whether any GCode has been written for the path.
-     */
-    bool writePathWithCoasting(GCodeExport& gcode, unsigned int extruder_plan_idx, unsigned int path_idx, int64_t layerThickness, double coasting_volume_move, double coasting_speed_move, double coasting_min_volume_move, double coasting_volume_retract, double coasting_speed_retract, double coasting_min_volume_retract);
-
-    /*!
-     * Writes a path to GCode and performs coasting, or returns false if it did nothing.
-     * 
-     * Coasting replaces the last piece of an extruded path by move commands and uses the oozed material to lay down lines.
-     * 
-     * Paths shorter than \p coasting_min_volume will use less \p coasting_volume linearly.
-     * 
-     * \param gcode The gcode to write the planned paths to
-     * \param path The extrusion path to be written to GCode.
-     * \param path_next The next travel path to be written to GCode.
-     * \param layerThickness The height of the current layer.
-     * \param coasting_volume The volume otherwise leaked.
-     * \param coasting_speed The speed at which to move during coasting.
+     * \param coasting_volume The volume otherwise leaked during a normal move.
+     * \param coasting_speed The speed at which to move during move-coasting.
      * \param coasting_min_volume The minimal volume a path should have which builds up enough pressure to ooze as much as \p coasting_volume.
-     * \param extruder_switch_retract (optional) For a coasted path followed by a retraction: whether to retract normally, or do an extruder switch retraction.
      * \return Whether any GCode has been written for the path.
      */
-    bool writePathWithCoasting(GCodeExport& gcode, GCodePath& path, GCodePath& path_next, int64_t layerThickness, double coasting_volume, double coasting_speed, double coasting_min_volume, bool extruder_switch_retract = false);
-    
+    bool writePathWithCoasting(GCodeExport& gcode, unsigned int extruder_plan_idx, unsigned int path_idx, int64_t layerThickness, double coasting_volume, double coasting_speed, double coasting_min_volume);
+
     /*!
      * Write a retraction: either an extruder switch retraction or a normal retraction based on the last extrusion paths retraction config.
      * \param gcode The gcode to write the planned paths to
@@ -447,7 +466,13 @@ public:
      */
     void processFanSpeedAndMinimalLayerTime();
     
-    void moveInsideCombBoundary(int arg1);
+    /*!
+     * Add a travel move to the layer plan to move inside the current layer part by a given distance away from the outline.
+     * This is supposed to be called when the nozzle is around the boundary of a layer part, not when the nozzle is in the middle of support, or in the middle of the air.
+     * 
+     * \param distance The distance to the comb boundary after we moved inside it.
+     */
+    void moveInsideCombBoundary(int distance);
 };
 
 }//namespace cura

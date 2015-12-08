@@ -1,11 +1,26 @@
+#include <cstring>
 #include "gcodePlanner.h"
 #include "pathOrderOptimizer.h"
 #include "sliceDataStorage.h"
-#include <cstring>
 #include "debug.h" // debugging
+#include "utils/polygonUtils.h"
 #include "MergeInfillLines.h"
 
 namespace cura {
+
+TimeMaterialEstimates TimeMaterialEstimates::operator-(const TimeMaterialEstimates& other)
+{
+    return TimeMaterialEstimates(extrude_time - other.extrude_time,unretracted_travel_time - other.unretracted_travel_time,retracted_travel_time - other.retracted_travel_time,material - other.material);
+}
+
+TimeMaterialEstimates& TimeMaterialEstimates::operator-=(const TimeMaterialEstimates& other)
+{
+    extrude_time -= other.extrude_time;
+    unretracted_travel_time -= other.unretracted_travel_time;
+    retracted_travel_time -= other.retracted_travel_time;
+    material -= other.material;
+    return *this;
+}
 
 GCodePath* GCodePlanner::getLatestPathWithConfig(GCodePathConfig* config, float flow)
 {
@@ -40,10 +55,14 @@ GCodePlanner::GCodePlanner(CommandSocket* commandSocket, SliceDataStorage& stora
 , layer_thickness(layer_thickness)
 , start_position(last_position)
 , lastPosition(last_position)
+, comb_boundary_inside(computeCombBoundaryInside())
 , fan_speed_layer_time_settings(fan_speed_layer_time_settings)
 {
+    extruder_plans.reserve(storage.meshgroup->getExtruderCount());
     extruder_plans.emplace_back(current_extruder);
     comb = nullptr;
+    was_inside = true; // means it will try to get inside the comb boundary first
+    is_inside = true; // means it will try to get inside the comb boundary 
     last_retraction_config = &storage.retraction_config; // start with general config
     setExtrudeSpeedFactor(1.0);
     setTravelSpeedFactor(1.0);
@@ -51,9 +70,7 @@ GCodePlanner::GCodePlanner(CommandSocket* commandSocket, SliceDataStorage& stora
     totalPrintTime = 0.0;
     if (retraction_combing)
     {
-        was_combing = true; // means it will try to get inside the comb boundary first
-        is_going_to_comb = true; // means it will try to get inside the comb boundary 
-        comb = new Comb(storage, layer_nr, comb_boundary_offset, travel_avoid_other_parts, travel_avoid_distance);
+        comb = new Comb(storage, layer_nr, comb_boundary_inside, comb_boundary_offset, travel_avoid_other_parts, travel_avoid_distance);
     }
     else
         comb = nullptr;
@@ -65,9 +82,27 @@ GCodePlanner::~GCodePlanner()
         delete comb;
 }
 
-void GCodePlanner::setCombing(bool going_to_comb)
+Polygons GCodePlanner::computeCombBoundaryInside()
 {
-    is_going_to_comb = going_to_comb;
+    if (layer_nr < 0)
+    { // when a raft is present
+        return storage.raftOutline.offset(MM2INT(0.1));
+    }
+    else 
+    {
+        Polygons layer_walls;
+        for (SliceMeshStorage& mesh : storage.meshes)
+        {
+            SliceLayer& layer = mesh.layers[layer_nr];
+            layer.getSecondOrInnermostWalls(layer_walls);
+        }
+        return layer_walls;
+    }
+}
+
+void GCodePlanner::setIsInside(bool _is_inside)
+{
+    is_inside = _is_inside;
 }
 
 
@@ -116,13 +151,14 @@ bool GCodePlanner::setExtruder(int extruder)
 
 void GCodePlanner::moveInsideCombBoundary(int distance)
 {
-    if (!comb) return;
-    Point p = lastPosition;
-    if (comb->moveInsideBoundary(&p, distance))
+    int max_dist = MM2INT(2.0); // if we are further than this distance, we conclude we are not inside even though we thought we were.
+    // this function is to be used to move from the boudary of a part to inside the part
+    Point p = lastPosition; // copy, since we are going to move p
+    if (PolygonUtils::moveInside(comb_boundary_inside, p, distance, max_dist) != NO_INDEX)
     {
         //Move inside again, so we move out of tight 90deg corners
-        comb->moveInsideBoundary(&p, distance);
-        if (comb->inside(p))
+        PolygonUtils::moveInside(comb_boundary_inside, p, distance, max_dist);
+        if (comb_boundary_inside.inside(p))
         {
             addTravel_simple(p);
             //Make sure the that any retraction happens after this move, not before it by starting a new move path.
@@ -140,7 +176,7 @@ void GCodePlanner::addTravel(Point p)
     if (comb != nullptr && lastPosition != no_point)
     {
         CombPaths combPaths;
-        combed = comb->calc(lastPosition, p, combPaths, was_combing, is_going_to_comb, last_retraction_config->retraction_min_travel_distance);
+        combed = comb->calc(lastPosition, p, combPaths, was_inside, is_inside, last_retraction_config->retraction_min_travel_distance);
         if (combed)
         {
             bool retract = combPaths.size() > 1;
@@ -182,24 +218,25 @@ void GCodePlanner::addTravel(Point p)
                 }
             }
         }
-        was_combing = is_going_to_comb;
     }
     
-    if(!combed) {
+    if (!combed) {
         // no combing? always retract!
         path = getLatestPathWithConfig(&storage.travel_config);
         if (!shorterThen(lastPosition - p, last_retraction_config->retraction_min_travel_distance))
         {
+            if (was_inside)
+            {
+                ExtruderTrain* extr = storage.meshgroup->getExtruderTrain(getExtruder());
+                assert (extr != nullptr);
+                moveInsideCombBoundary(extr->getSettingInMicrons("machine_nozzle_size") * 1);
+            }
             path->retract = true;
         }
     }
     
-    if(comb == nullptr) {
-        // no combing? always retract!
-        path = getLatestPathWithConfig(&storage.travel_config);
-        path->retract = true;
-    }
     addTravel_simple(p, path);
+    was_inside = is_inside;
 }
 
 void GCodePlanner::addTravel_simple(Point p, GCodePath* path)
@@ -501,9 +538,7 @@ void GCodePlanner::writeGCode(GCodeExport& gcode, bool liftHeadIfNeeded, int lay
                 bool coasting = coasting_config.coasting_enable; 
                 if (coasting)
                 {
-                    coasting = writePathWithCoasting(gcode, extruder_plan_idx, path_idx, layerThickness
-                                , coasting_config.coasting_volume_move, coasting_config.coasting_speed_move, coasting_config.coasting_min_volume_move
-                                , coasting_config.coasting_volume_retract, coasting_config.coasting_speed_retract, coasting_config.coasting_min_volume_retract);
+                    coasting = writePathWithCoasting(gcode, extruder_plan_idx, path_idx, layerThickness, coasting_config.coasting_volume, coasting_config.coasting_speed, coasting_config.coasting_min_volume);
                 }
                 if (! coasting) // not same as 'else', cause we might have changed [coasting] in the line above...
                 { // normal path to gcode algorithm
@@ -688,8 +723,12 @@ bool GCodePlanner::makeRetractSwitchRetract(GCodeExport& gcode, unsigned int ext
     }
 }
     
-bool GCodePlanner::writePathWithCoasting(GCodeExport& gcode, unsigned int extruder_plan_idx, unsigned int path_idx, int64_t layerThickness, double coasting_volume_move, double coasting_speed_move, double coasting_min_volume_move, double coasting_volume_retract, double coasting_speed_retract, double coasting_min_volume_retract)
+bool GCodePlanner::writePathWithCoasting(GCodeExport& gcode, unsigned int extruder_plan_idx, unsigned int path_idx, int64_t layerThickness, double coasting_volume, double coasting_speed, double coasting_min_volume)
 {
+    if (coasting_volume <= 0) 
+    { 
+        return false; 
+    }
     std::vector<GCodePath>& paths = extruder_plans[extruder_plan_idx].paths;
     GCodePath& path = paths[path_idx];
     if (path_idx + 1 >= paths.size()
@@ -701,21 +740,6 @@ bool GCodePlanner::writePathWithCoasting(GCodeExport& gcode, unsigned int extrud
     {
         return false;
     }
-    GCodePath& path_next = paths[path_idx + 1];
-    
-    if (path_next.retract)
-    {
-        if (coasting_volume_retract <= 0) { return false; }
-        return writePathWithCoasting(gcode, path, path_next, layerThickness, coasting_volume_retract, coasting_speed_retract, coasting_min_volume_retract, makeRetractSwitchRetract(gcode, extruder_plan_idx, path_idx));
-    }
-    else
-    {
-        if (coasting_volume_move <= 0) { return false; }
-        return writePathWithCoasting(gcode, path, path_next, layerThickness, coasting_volume_move, coasting_speed_move, coasting_min_volume_move);
-    }
-}  
-bool GCodePlanner::writePathWithCoasting(GCodeExport& gcode, GCodePath& path, GCodePath& path_next, int64_t layerThickness, double coasting_volume, double coasting_speed, double coasting_min_volume, bool extruder_switch_retract)
-{
 
     int64_t coasting_min_dist_considered = 100; // hardcoded setting for when to not perform coasting
 
@@ -776,14 +800,11 @@ bool GCodePlanner::writePathWithCoasting(GCodeExport& gcode, GCodePath& path, GC
             }
         }
     }
-    
-    if (acc_dist_idx_gt_coast_dist == NO_INDEX) 
-    { // something has gone wrong; coasting_min_dist < coasting_dist ?
-        return false;
-    }
-    
+
+    assert (acc_dist_idx_gt_coast_dist < accumulated_dist_per_point.size()); // something has gone wrong; coasting_min_dist < coasting_dist ?
+
     unsigned int point_idx_before_start = path.points.size() - 1 - acc_dist_idx_gt_coast_dist;
-    
+
     Point start;
     { // computation of begin point of coasting
         int64_t residual_dist = actual_coasting_dist - accumulated_dist_per_point[acc_dist_idx_gt_coast_dist - 1];
@@ -791,7 +812,7 @@ bool GCodePlanner::writePathWithCoasting(GCodeExport& gcode, GCodePath& path, GC
         Point& b = path.points[point_idx_before_start + 1];
         start = b + normal(a-b, residual_dist);
     }
-    
+
     { // write normal extrude path:
         for(unsigned int point_idx = 0; point_idx <= point_idx_before_start; point_idx++)
         {
@@ -799,19 +820,14 @@ bool GCodePlanner::writePathWithCoasting(GCodeExport& gcode, GCodePath& path, GC
         }
         gcode.writeMove(start, extrude_speed, path.getExtrusionMM3perMM());
     }
-    
-    if (path_next.retract)
-    {
-        writeRetraction(gcode, extruder_switch_retract, path.config->retraction_config);
-    }
-    
+
+
     for (unsigned int point_idx = point_idx_before_start + 1; point_idx < path.points.size(); point_idx++)
     {
         gcode.writeMove(path.points[point_idx], coasting_speed * path.config->getSpeed(), 0);
     }
-    
+
     gcode.addLastCoastedVolume(path.getExtrusionMM3perMM() * INT2MM(actual_coasting_dist));
-    
     return true;
 }
 
