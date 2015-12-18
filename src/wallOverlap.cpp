@@ -207,7 +207,10 @@ void WallOverlapComputation::addOverlapEnding(std::pair<WallOverlapPointLink, Wa
         || point_to_link.find(b2_it.p()) == point_to_link.end())
     {
         int64_t dist = overlapEndingDistance(a1, a2, b1, b2, link_pair.second.dist);
-        if (dist < 0) { return; }
+        if (dist < 0) 
+        { 
+            return; 
+        }
         int64_t a_length2 = vSize2(a);
         int64_t b_length2 = vSize2(b);
         if (dist*dist > std::min(a_length2, b_length2) )
@@ -286,7 +289,10 @@ void WallOverlapComputation::addToPoint2LinkMap(Point p, WallOverlapPointLinks::
 float WallOverlapComputation::getFlow(Point& from, Point& to)
 {
     Point2Link::iterator from_link_pair = point_to_link.find(from);
-    if (from_link_pair == point_to_link.end()) { return 1; }
+    if (from_link_pair == point_to_link.end()) 
+    { 
+        return 1; 
+    }
     WallOverlapPointLinks::iterator from_link = from_link_pair->second;
     if (!from_link->second.passed)// || !to_link->second.passed)
     {
@@ -297,19 +303,25 @@ float WallOverlapComputation::getFlow(Point& from, Point& to)
     from_link->second.passed = true;
     
     Point2Link::iterator to_link_pair = point_to_link.find(to);
-    if (to_link_pair == point_to_link.end()) { return 1; }
+    if (to_link_pair == point_to_link.end()) 
+    { 
+        return 1; 
+    }
     WallOverlapPointLinks::iterator to_link = to_link_pair->second;
 //     to_link->second = true;
-    
-    
+
+
     // both points have already been passed
-    
+
     float avg_link_dist = 0.5 * ( INT2MM(from_link->second.dist) + INT2MM(to_link->second.dist) );
-   
+
     float ratio = avg_link_dist / INT2MM(line_width);
 
-    if (ratio > 1.0) { return 1.0; }
-    
+    if (ratio > 1.0) 
+    { 
+        return 1.0; 
+    }
+
     return ratio;
 }
 

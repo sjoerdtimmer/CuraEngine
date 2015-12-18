@@ -80,13 +80,19 @@ class WallOverlapComputation
         ListPolyIt& operator++() 
         { 
             ++it; 
-            if (it == poly.end()) { it = poly.begin(); }
+            if (it == poly.end()) 
+            { 
+                it = poly.begin(); 
+            }
             return *this; 
         }
         //!< move the iterator backward (and wrap around at the beginning)
         ListPolyIt& operator--() 
         { 
-            if (it == poly.begin()) { it = poly.end(); }
+            if (it == poly.begin()) 
+            { 
+                it = poly.end(); 
+            }
             --it; 
             return *this; 
         }

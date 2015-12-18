@@ -122,7 +122,10 @@ unsigned int PolygonUtils::moveInside(Polygons& polygons, Point& from, int dista
                     {
                         bestDist2 = dist2;
                         bestPoly = poly_idx;
-                        if (distance == 0) { ret = x; }
+                        if (distance == 0) 
+                        { 
+                            ret = x; 
+                        }
                         else 
                         { 
                             Point inward_dir = crossZ(normal(ab,distance * 4) + normal(p1 - p0,distance * 4));
@@ -156,7 +159,10 @@ unsigned int PolygonUtils::moveInside(Polygons& polygons, Point& from, int dista
                 {
                     bestDist2 = dist2;
                     bestPoly = poly_idx;
-                    if (distance == 0) { ret = x; }
+                    if (distance == 0) 
+                    { 
+                        ret = x; 
+                    }
                     else 
                     { 
                         Point inward_dir = crossZ(normal(ab, distance));
@@ -489,7 +495,10 @@ bool PolygonUtils::polygonCollidesWithlineSegment(Polygons& polys, Point& transf
 {
     for(PolygonRef poly : polys)
     {
-        if (poly.size() == 0) { continue; }
+        if (poly.size() == 0) 
+        { 
+            continue; 
+        }
         if (PolygonUtils::polygonCollidesWithlineSegment(poly, transformed_startPoint, transformed_endPoint, transformation_matrix))
         {
             return true;
