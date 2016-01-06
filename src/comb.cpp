@@ -240,8 +240,14 @@ void LinePolygonsCrossings::calcScanlineCrossings()
         
         if (minMax.min.point_idx != NO_INDEX)
         { // then also max.point_idx != -1
-            if (min_crossing_idx == NO_INDEX || minMax.min.x < crossings[min_crossing_idx].min.x) { min_crossing_idx = crossings.size(); }
-            if (max_crossing_idx == NO_INDEX || minMax.max.x > crossings[max_crossing_idx].max.x) { max_crossing_idx = crossings.size(); }
+            if (min_crossing_idx == NO_INDEX || minMax.min.x < crossings[min_crossing_idx].min.x) 
+            {
+                min_crossing_idx = crossings.size();
+            }
+            if (max_crossing_idx == NO_INDEX || minMax.max.x > crossings[max_crossing_idx].max.x)
+            {
+                max_crossing_idx = crossings.size();
+            }
             crossings.push_back(minMax);
         }
         

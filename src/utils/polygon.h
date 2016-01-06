@@ -561,7 +561,10 @@ public:
             for (unsigned int idx = 0; idx < poly.size(); idx++)
             {
                 Point& last = (result.size() == 0) ? poly.back() : result.back();
-                if (idx+1 == poly.size() && result.size() == 0) { break; }
+                if (idx+1 == poly.size() && result.size() == 0)
+                {
+                    break;
+                }
                 Point& next = (idx+1 == poly.size())? result[0] : poly[idx+1];
                 if ( isDegenerate(last, poly[idx], next) )
                 { // lines are in the opposite direction

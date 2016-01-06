@@ -73,7 +73,10 @@ void generateSkirt(SliceDataStorage& storage, int distance, int count, int minLe
         int last_width = primary_extrusion_width;
         for (int extruder = 0; extruder < storage.meshgroup->getExtruderCount(); extruder++)
         {
-            if (extruder == primary_extruder) { continue; }
+            if (extruder == primary_extruder)
+            {
+                continue;
+            }
             int width = storage.meshgroup->getExtruderTrain(extruder)->getSettingInMicrons("skirt_line_width");
             offset_distance += last_width / 2 + width/2;
             last_width = width;

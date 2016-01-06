@@ -299,7 +299,10 @@ void FffPolygonGenerator::processSkinsAndInfill(SliceDataStorage& storage, unsig
 {
     for(SliceMeshStorage& mesh : storage.meshes)
     {
-        if (mesh.getSettingAsSurfaceMode("magic_mesh_surface_mode") == ESurfaceMode::SURFACE) { continue; }
+        if (mesh.getSettingAsSurfaceMode("magic_mesh_surface_mode") == ESurfaceMode::SURFACE) 
+        {
+            continue;
+        }
         
         int wall_line_count = mesh.getSettingAsCount("wall_line_count");
         int skin_extrusion_width = mesh.getSettingInMicrons("skin_line_width");
@@ -452,7 +455,10 @@ void FffPolygonGenerator::processFuzzyWalls(SliceMeshStorage& mesh)
                 {
                     unsigned int point_idx = poly.size() - 2;
                     result.add(poly[point_idx]);
-                    if (point_idx == 0) { break; }
+                    if (point_idx == 0) 
+                    {
+                        break;
+                    }
                     point_idx--;
                 }
                 if (result.size() < 3)

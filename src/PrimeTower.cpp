@@ -82,7 +82,10 @@ void PrimeTower::computePrimeTowerMax(SliceDataStorage& storage)
         int extruder_second_max_object_height = -1;
         for (int extruder_nr = 0; extruder_nr < extruder_count; extruder_nr++)
         {
-            if (extruder_nr == extruder_max_object_height) { continue; }
+            if (extruder_nr == extruder_max_object_height)
+            {
+                continue;
+            }
             if (extruder_second_max_object_height == -1 || max_object_height_per_extruder[extruder_nr] > max_object_height_per_extruder[extruder_second_max_object_height])
             {
                 extruder_second_max_object_height = extruder_nr;

@@ -125,7 +125,10 @@ unsigned int Polygons::findInside(Point p, bool border_result)
             }
         }
     }
-    if (n_unevens % 2 == 0) { ret = NO_INDEX; }
+    if (n_unevens % 2 == 0)
+    {
+        ret = NO_INDEX;
+    }
     return ret;
 }
 
@@ -258,11 +261,17 @@ unsigned int PartsView::getPartContaining(unsigned int poly_idx, unsigned int* b
     for (unsigned int part_idx_now = 0; part_idx_now < partsView.size(); part_idx_now++)
     {
         std::vector<unsigned int>& partView = partsView[part_idx_now];
-        if (partView.size() == 0) { continue; }
+        if (partView.size() == 0)
+        {
+            continue;
+        }
         std::vector<unsigned int>::iterator result = std::find(partView.begin(), partView.end(), poly_idx);
         if (result != partView.end()) 
         { 
-            if (boundary_poly_idx) { *boundary_poly_idx = partView[0]; }
+            if (boundary_poly_idx)
+            {
+                *boundary_poly_idx = partView[0];
+            }
             return part_idx_now;
         }
     }

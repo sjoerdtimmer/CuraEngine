@@ -804,7 +804,10 @@ void FffGcodeWriter::addSupportInfillToGCode(SliceDataStorage& storage, GCodePla
     int support_line_distance = getSettingInMicrons("support_line_distance");
     int extrusion_width = storage.support_config.getLineWidth();
     EFillMethod support_pattern = getSettingAsFillMethod("support_pattern");
-    if (layer_nr == 0 && (support_pattern == EFillMethod::LINES || support_pattern == EFillMethod::ZIG_ZAG)) { support_pattern = EFillMethod::GRID; }
+    if (layer_nr == 0 && (support_pattern == EFillMethod::LINES || support_pattern == EFillMethod::ZIG_ZAG)) 
+    {
+        support_pattern = EFillMethod::GRID;
+    }
     
     int support_infill_extruder_nr = (layer_nr == 0)? getSettingAsIndex("support_extruder_nr_layer_0") : getSettingAsIndex("support_infill_extruder_nr");
     
@@ -885,10 +888,15 @@ void FffGcodeWriter::addSupportRoofsToGCode(SliceDataStorage& storage, GCodePlan
 void FffGcodeWriter::setExtruder_addPrime(SliceDataStorage& storage, GCodePlanner& gcode_layer, int layer_nr, int extruder_nr)
 {
     if (extruder_nr == -1) // an object with extruder_nr==-1 means it will be printed with any current nozzle
+    {
         return;
+    }
     
     int previous_extruder = gcode_layer.getExtruder();
-    if (previous_extruder == extruder_nr) { return; }
+    if (previous_extruder == extruder_nr) 
+    {
+        return;
+    }
     bool extruder_changed = gcode_layer.setExtruder(extruder_nr);
     
     if (extruder_changed)

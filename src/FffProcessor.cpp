@@ -58,7 +58,10 @@ bool FffProcessor::processFiles(const std::vector< std::string >& files)
 
 bool FffProcessor::processMeshGroup(MeshGroup* meshgroup)
 {
-    if (SHOW_ALL_SETTINGS) { logWarning(getAllSettingsString(*meshgroup, first_meshgroup).c_str()); }
+    if (SHOW_ALL_SETTINGS) 
+    {
+        logWarning(getAllSettingsString(*meshgroup, first_meshgroup).c_str());
+    }
     time_keeper.restart();
     if (!meshgroup)
         return false;

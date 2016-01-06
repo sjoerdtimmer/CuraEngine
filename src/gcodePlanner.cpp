@@ -194,7 +194,10 @@ void GCodePlanner::addTravel(Point p)
                 
                 for (unsigned int path_idx = 0; path_idx < combPaths.size() && !retract; path_idx++)
                 { // retract when path moves through a boundary
-                    if (combPaths[path_idx].cross_boundary) { retract = true; }
+                    if (combPaths[path_idx].cross_boundary)
+                    {
+                        retract = true;
+                    }
                 }
             }
             

@@ -288,12 +288,17 @@ void AreaSupport::detectOverhangPoints(
             {
                 Polygons part_poly_computed;
                 Polygons& part_poly = (part.insets.size() > 0)? part.insets[0] : part_poly_computed; // don't copy inset if its already computed
-                if (part.insets.size() == 0) { part_poly_computed = part.outline.offset(-extrusionWidth/2); }
+                if (part.insets.size() == 0)
+                {
+                    part_poly_computed = part.outline.offset(-extrusionWidth/2);
+                }
                 
                 if (part_poly.size() > 0)
                 {
                     if (overhang_points.size() > 0 && overhang_points.back().first == layer_idx)
+                    {
                         overhang_points.back().second.push_back(part_poly);
+                    }
                     else 
                     {
                         std::vector<Polygons> small_part_polys;

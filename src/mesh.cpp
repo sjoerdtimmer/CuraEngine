@@ -127,11 +127,22 @@ int Mesh::getFaceIdxWithPoints(int idx0, int idx1, int notFaceIdx)
 
     }
 
-    if (candidateFaces.size() == 0) { cura::logError("Couldn't find face connected to face %i.\n", notFaceIdx); return -1; }
-    if (candidateFaces.size() == 1) { return candidateFaces[0]; }
+    if (candidateFaces.size() == 0)
+    {
+        cura::logError("Couldn't find face connected to face %i.\n", notFaceIdx); 
+        return -1;
+    }
+    if (candidateFaces.size() == 1)
+    {
+        return candidateFaces[0];
+    }
 
 
-    if (notFaceVertexIdx < 0) { cura::logError("Couldn't find third point on face %i.\n", notFaceIdx); return -1; }
+    if (notFaceVertexIdx < 0)
+    {
+        cura::logError("Couldn't find third point on face %i.\n", notFaceIdx);
+        return -1;
+    }
 
     if (candidateFaces.size() % 2 == 0) cura::log("Warning! Edge with uneven number of faces connecting it!(%i)\n", candidateFaces.size()+1);
 

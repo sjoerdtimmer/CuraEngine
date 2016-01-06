@@ -71,7 +71,10 @@ void layerparts2HTML(SliceDataStorage& storage, const char* filename, bool all_l
     {
         for(unsigned int layer_idx = 0; layer_idx < mesh.layers.size(); layer_idx++)
         {
-            if (!(all_layers || int(layer_idx) == layer_nr)) { continue; }
+            if (!(all_layers || int(layer_idx) == layer_nr))
+            {
+                continue;
+            }
             SliceLayer& layer = mesh.layers[layer_idx];
 //             fprintf(out, "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" style=\"width: 500px; height:500px\">\n");
             for(SliceLayerPart& part : layer.parts)
