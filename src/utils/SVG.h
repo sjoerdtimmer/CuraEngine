@@ -54,7 +54,7 @@ public:
     , scale(std::min(double(canvas_size.X - 20) / aabb_size.X, double(canvas_size.Y - 20) / aabb_size.Y))
     {
         out = fopen(filename, "w");
-        if(!out)
+        if (!out)
         {
             logError("The file %s could not be opened for writing.",filename);
         }
@@ -190,7 +190,7 @@ public:
      */
     void writeLines(std::vector<Point> polyline,Color color = Color::BLACK)
     {
-        if(polyline.size() <= 1) //Need at least 2 points.
+        if (polyline.size() <= 1) //Need at least 2 points.
         {
             return;
         }

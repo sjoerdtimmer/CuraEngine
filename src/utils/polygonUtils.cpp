@@ -104,7 +104,7 @@ unsigned int PolygonUtils::moveInside(Polygons& polygons, Point& from, int dista
             Point ab = b - a;
             Point ap = p - a;
             int64_t ab_length = vSize(ab);
-            if(ab_length <= 0) //A = B, i.e. the input polygon had two adjacent points on top of each other.
+            if (ab_length <= 0) //A = B, i.e. the input polygon had two adjacent points on top of each other.
             {
                 p1 = p2; //Skip only one of the points.
                 continue;
@@ -464,7 +464,7 @@ bool PolygonUtils::polygonCollidesWithlineSegment(PolygonRef poly, Point& transf
         if ((p0.Y >= transformed_startPoint.Y && p1.Y <= transformed_startPoint.Y) || (p1.Y >= transformed_startPoint.Y && p0.Y <= transformed_startPoint.Y))
         {
             int64_t x;
-            if(p1.Y == p0.Y)
+            if (p1.Y == p0.Y)
             {
                 x = p0.X;
             }

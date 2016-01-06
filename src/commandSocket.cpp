@@ -120,19 +120,19 @@ void CommandSocket::connect(const std::string& ip, int port)
         // Actually start handling messages.
         Arcus::MessagePtr message = private_data->socket->takeNextMessage();
         cura::proto::SettingList* setting_list = dynamic_cast<cura::proto::SettingList*>(message.get());
-        if(setting_list)
+        if (setting_list)
         {
             handleSettingList(setting_list);
         }
 
         /*cura::proto::ObjectList* object_list = dynamic_cast<cura::proto::ObjectList*>(message.get());
-        if(object_list)
+        if (object_list)
         {
             handleObjectList(object_list);
         }*/
         
         cura::proto::Slice* slice = dynamic_cast<cura::proto::Slice*>(message.get());
-        if(slice)
+        if (slice)
         {
             // Reset object counts
             private_data->object_count = 0;
@@ -144,12 +144,12 @@ void CommandSocket::connect(const std::string& ip, int port)
         }
 
         //If there is an object to slice, do so.
-        if(private_data->objects_to_slice.size())
+        if (private_data->objects_to_slice.size())
         {
             FffProcessor::getInstance()->resetFileNumber();
             for(auto object : private_data->objects_to_slice)
             {
-                if(!FffProcessor::getInstance()->processMeshGroup(object.get()))
+                if (!FffProcessor::getInstance()->processMeshGroup(object.get()))
                 {
                     logError("Slicing mesh group failed!");
                 }
@@ -167,7 +167,7 @@ void CommandSocket::connect(const std::string& ip, int port)
             //sendPrintTime();
         }
 
-        if(!private_data->socket->errorString().empty()) 
+        if (!private_data->socket->errorString().empty()) 
         {
             logError("%s\n", private_data->socket->errorString().data());
             private_data->socket->clearError();
@@ -263,7 +263,7 @@ void CommandSocket::handleSettingList(cura::proto::SettingList* list)
 void CommandSocket::sendLayerInfo(int layer_nr, int32_t z, int32_t height)
 {
 #ifdef ARCUS
-    if(!private_data->current_sliced_object)
+    if (!private_data->current_sliced_object)
     {
         return;
     }
@@ -277,7 +277,7 @@ void CommandSocket::sendLayerInfo(int layer_nr, int32_t z, int32_t height)
 void CommandSocket::sendPolygons(PrintFeatureType type, int layer_nr, Polygons& polygons, int line_width)
 {
 #ifdef ARCUS
-    if(!private_data->current_sliced_object)
+    if (!private_data->current_sliced_object)
         return;
     
     if (polygons.size() == 0)
@@ -335,7 +335,7 @@ void CommandSocket::sendPrintMaterialForObject(int index, int extruder_nr, float
 void CommandSocket::beginSendSlicedObject()
 {
 #ifdef ARCUS
-    if(!private_data->sliced_object_list)
+    if (!private_data->sliced_object_list)
     {
         private_data->sliced_object_list = std::make_shared<cura::proto::SlicedObjectList>();
     }
@@ -352,7 +352,7 @@ void CommandSocket::endSendSlicedObject()
     private_data->current_layer_offset = private_data->current_layer_count;
     std::cout << "End sliced object called. Sliced objects " << private_data->sliced_objects << " object count: " << private_data->object_count << std::endl;
 
-    if(private_data->sliced_objects >= private_data->object_count)
+    if (private_data->sliced_objects >= private_data->object_count)
     {
         private_data->socket->sendMessage(private_data->sliced_object_list);
         private_data->sliced_objects = 0;
@@ -397,10 +397,10 @@ cura::proto::Layer* CommandSocket::Private::getLayerById(int id)
 {
     id += current_layer_offset;
 
-    auto itr = std::find_if(current_sliced_object->mutable_layers()->begin(), current_sliced_object->mutable_layers()->end(), [id](cura::proto::Layer& l) { return l.id() == id; });
+    auto itr = std::find_if (current_sliced_object->mutable_layers()->begin(), current_sliced_object->mutable_layers()->end(), [id](cura::proto::Layer& l) { return l.id() == id; });
 
     cura::proto::Layer* layer = nullptr;
-    if(itr != current_sliced_object->mutable_layers()->end())
+    if (itr != current_sliced_object->mutable_layers()->end())
     {
         layer = &(*itr);
     }

@@ -165,11 +165,11 @@ void generateInfill(int layerNr, SliceMeshStorage& storage, int extrusionWidth, 
 
 void combineInfillLayers(SliceMeshStorage& storage,unsigned int amount)
 {
-    if(amount <= 1) //If we must combine 1 layer, nothing needs to be combined. Combining 0 layers is invalid.
+    if (amount <= 1) //If we must combine 1 layer, nothing needs to be combined. Combining 0 layers is invalid.
     {
         return;
     }
-    if(storage.layers.empty() || storage.layers.size() - 1 < static_cast<size_t>(storage.getSettingAsCount("top_layers")) || storage.getSettingAsCount("infill_line_distance") <= 0) //No infill is even generated.
+    if (storage.layers.empty() || storage.layers.size() - 1 < static_cast<size_t>(storage.getSettingAsCount("top_layers")) || storage.getSettingAsCount("infill_line_distance") <= 0) //No infill is even generated.
     {
         return;
     }
@@ -187,7 +187,7 @@ void combineInfillLayers(SliceMeshStorage& storage,unsigned int amount)
 
         for(unsigned int n = 1;n < amount;n++)
         {
-            if(layer_idx < n)
+            if (layer_idx < n)
             {
                 break;
             }
@@ -198,7 +198,7 @@ void combineInfillLayers(SliceMeshStorage& storage,unsigned int amount)
                 Polygons result;
                 for(SliceLayerPart& part2 : layer2->parts)
                 {
-                    if(part.boundaryBox.hit(part2.boundaryBox))
+                    if (part.boundaryBox.hit(part2.boundaryBox))
                     {
                         Polygons intersection = part.infill_area[n - 1].intersection(part2.infill_area[0]).offset(-200).offset(200);
                         result.add(intersection);

@@ -132,7 +132,7 @@ void TimeEstimateCalculator::plan(Position newPos, double feedrate)
     }
     //TODO: XY_FREQUENCY_LIMIT
     
-    if(feedrate_factor < 1.0)
+    if (feedrate_factor < 1.0)
     {
         for(unsigned int n=0; n<NUM_AXIS; n++)
         {
@@ -151,9 +151,9 @@ void TimeEstimateCalculator::plan(Position newPos, double feedrate)
     
     double vmax_junction = max_xy_jerk/2; 
     double vmax_junction_factor = 1.0; 
-    if(current_abs_feedrate[Z_AXIS] > max_z_jerk/2)
+    if (current_abs_feedrate[Z_AXIS] > max_z_jerk/2)
         vmax_junction = std::min(vmax_junction, max_z_jerk/2);
-    if(current_abs_feedrate[E_AXIS] > max_e_jerk/2)
+    if (current_abs_feedrate[E_AXIS] > max_e_jerk/2)
         vmax_junction = std::min(vmax_junction, max_e_jerk/2);
     vmax_junction = std::min(vmax_junction, block.nominal_feedrate);
     double safe_speed = vmax_junction;
@@ -165,10 +165,10 @@ void TimeEstimateCalculator::plan(Position newPos, double feedrate)
         if (xy_jerk > max_xy_jerk) {
             vmax_junction_factor = (max_xy_jerk/xy_jerk);
         } 
-        if(fabs(current_feedrate[Z_AXIS] - previous_feedrate[Z_AXIS]) > max_z_jerk) {
+        if (fabs(current_feedrate[Z_AXIS] - previous_feedrate[Z_AXIS]) > max_z_jerk) {
             vmax_junction_factor = std::min(vmax_junction_factor, (max_z_jerk/fabs(current_feedrate[Z_AXIS] - previous_feedrate[Z_AXIS])));
         } 
-        if(fabs(current_feedrate[E_AXIS] - previous_feedrate[E_AXIS]) > max_e_jerk) {
+        if (fabs(current_feedrate[E_AXIS] - previous_feedrate[E_AXIS]) > max_e_jerk) {
             vmax_junction_factor = std::min(vmax_junction_factor, (max_e_jerk/fabs(current_feedrate[E_AXIS] - previous_feedrate[E_AXIS])));
         } 
         vmax_junction = std::min(previous_nominal_feedrate, vmax_junction * vmax_junction_factor); // Limit speed to max previous speed
@@ -214,7 +214,7 @@ double TimeEstimateCalculator::calculate()
 void TimeEstimateCalculator::planner_reverse_pass_kernel(Block *previous, Block *current, Block *next)
 {
     (void)previous;
-    if(!current || !next)
+    if (!current || !next)
         return;
 
     // If entry speed is already at the maximum entry speed, no need to recheck. Block is cruising.
@@ -252,7 +252,7 @@ void TimeEstimateCalculator::reverse_pass()
 void TimeEstimateCalculator::planner_forward_pass_kernel(Block *previous, Block *current, Block *next)
 {
     (void)next;
-    if(!previous)
+    if (!previous)
         return;
 
     // If the previous block is an acceleration block, but it is not long enough to complete the
@@ -312,7 +312,7 @@ void TimeEstimateCalculator::recalculate_trapezoids()
         }
     }
     // Last/newest block in buffer. Exit speed is set with MINIMUM_PLANNER_SPEED. Always recalculated.
-    if(next != nullptr)
+    if (next != nullptr)
     {
         calculate_trapezoid_for_block(next, next->entry_speed/next->nominal_feedrate, MINIMUM_PLANNER_SPEED/next->nominal_feedrate);
         next->recalculate_flag = false;

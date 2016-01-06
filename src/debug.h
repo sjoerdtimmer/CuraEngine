@@ -47,8 +47,8 @@ int len = str.length(); \
 std::vector<std::string> strings; \
 std::ostringstream temp; \
 for(int i = 0; i < len; i ++) { \
-if(isspace(str[i])) continue; \
-        else if(str[i] == ',') { \
+if (isspace(str[i])) continue; \
+        else if (str[i] == ',') { \
         strings.push_back(temp.str()); \
         temp.str(std::string());\
         } \

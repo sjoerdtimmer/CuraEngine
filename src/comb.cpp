@@ -116,14 +116,14 @@ bool Comb::calc(Point startPoint, Point endPoint, CombPaths& combPaths, bool sta
             PolygonUtils::moveInside(boundary_inside,inside_middle_from,offset_dist_to_get_from_on_the_polygon_to_outside,max_comb_distance_ignored); //Also move the intermediary waypoint inside if it isn't yet.
             PolygonUtils::moveInside(boundary_inside,inside_middle_to,offset_dist_to_get_from_on_the_polygon_to_outside,max_comb_distance_ignored);
         }
-        else if(!startInside && !endInside)
+        else if (!startInside && !endInside)
         {
             middle_from = startPoint;
             inside_middle_from = startPoint;
             middle_to = endPoint;
             inside_middle_to = endPoint;
         }
-        else if(!startInside && endInside)
+        else if (!startInside && endInside)
         {
             middle_from = startPoint;
             inside_middle_from = startPoint;
@@ -132,7 +132,7 @@ bool Comb::calc(Point startPoint, Point endPoint, CombPaths& combPaths, bool sta
             inside_middle_to = middle_to_cp.location;
             PolygonUtils::moveInside(boundary_inside,inside_middle_to,offset_dist_to_get_from_on_the_polygon_to_outside,max_comb_distance_ignored);
         }
-        else if(startInside && !endInside)
+        else if (startInside && !endInside)
         {
             middle_to = endPoint;
             inside_middle_to = endPoint;
@@ -211,9 +211,9 @@ void LinePolygonsCrossings::calcScanlineCrossings()
         for(unsigned int point_idx = 0; point_idx < poly.size(); point_idx++)
         {
             Point p1 = transformation_matrix.apply(poly[point_idx]);
-            if((p0.Y >= transformed_startPoint.Y && p1.Y <= transformed_startPoint.Y) || (p1.Y >= transformed_startPoint.Y && p0.Y <= transformed_startPoint.Y))
+            if ((p0.Y >= transformed_startPoint.Y && p1.Y <= transformed_startPoint.Y) || (p1.Y >= transformed_startPoint.Y && p0.Y <= transformed_startPoint.Y))
             {
-                if(p1.Y == p0.Y) //Line segment is parallel with the scanline. That means that both endpoints lie on the scanline, so they will have intersected with the adjacent line.
+                if (p1.Y == p0.Y) //Line segment is parallel with the scanline. That means that both endpoints lie on the scanline, so they will have intersected with the adjacent line.
                 {
                     p0 = p1;
                     continue;
@@ -222,13 +222,13 @@ void LinePolygonsCrossings::calcScanlineCrossings()
                 
                 if (x >= transformed_startPoint.X && x <= transformed_endPoint.X)
                 {
-                    if(x < minMax.min.x) //For the leftmost intersection, move x left to stay outside of the border.
+                    if (x < minMax.min.x) //For the leftmost intersection, move x left to stay outside of the border.
                                          //Note: The actual distance from the intersection to the border is almost always less than dist_to_move_boundary_point_outside, since it only moves along the direction of the scanline.
                     {
                         minMax.min.x = x;
                         minMax.min.point_idx = point_idx;
                     }
-                    if(x > minMax.max.x) //For the rightmost intersection, move x right to stay outside of the border.
+                    if (x > minMax.max.x) //For the rightmost intersection, move x right to stay outside of the border.
                     {
                         minMax.max.x = x;
                         minMax.max.point_idx = point_idx;
@@ -360,7 +360,7 @@ bool LinePolygonsCrossings::optimizePath(CombPath& comb_path, CombPath& optimize
     optimized_comb_path.push_back(startPoint);
     for(unsigned int point_idx = 1; point_idx<comb_path.size(); point_idx++)
     {
-        if(comb_path[point_idx] == comb_path[point_idx - 1]) //Two points are the same. Skip the second.
+        if (comb_path[point_idx] == comb_path[point_idx - 1]) //Two points are the same. Skip the second.
         {
             continue;
         }
