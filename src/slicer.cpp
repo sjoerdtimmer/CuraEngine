@@ -24,7 +24,7 @@ void SlicerLayer::makePolygons(Mesh* mesh, bool keep_none_closed, bool extensive
         
         unsigned int segmentIndex = startSegment;
         bool canClose;
-        while(true)
+        while (true)
         {
             canClose = false;
             segmentList[segmentIndex].addedToPolygon = true;
@@ -98,7 +98,7 @@ void SlicerLayer::makePolygons(Mesh* mesh, bool keep_none_closed, bool extensive
     if (mesh->getSettingAsSurfaceMode("magic_mesh_surface_mode") == ESurfaceMode::NORMAL)
     {
         //Next link up all the missing ends, closing up the smallest gaps first. This is an inefficient implementation which can run in O(n*n*n) time.
-        while(1)
+        while (1)
         {
         int64_t bestScore = MM2INT(10.0) * MM2INT(10.0);
         unsigned int bestA = -1;
@@ -177,7 +177,7 @@ void SlicerLayer::makePolygons(Mesh* mesh, bool keep_none_closed, bool extensive
         // And generate a path over this shortest bit to link up the 2 open polygons.
         // (If these 2 open polygons are the same polygon, then the final result is a closed polyon)
         
-        while(1)
+        while (1)
         {
             unsigned int bestA = -1;
             unsigned int bestB = -1;

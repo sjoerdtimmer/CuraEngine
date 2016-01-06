@@ -181,7 +181,7 @@ void MergeInfillLines::merge(Point& from, Point& p0, Point& p1)
     {
         Point p0 = path->points[0];
         unsigned int path_idx_last = path_idx + 1; // index of the last short move 
-        while(path_idx_last < paths.size() && paths[path_idx_last].points.size() == 1 && shorterThen(p0 - paths[path_idx_last].points[0], path->config->getLineWidth() * 2))
+        while (path_idx_last < paths.size() && paths[path_idx_last].points.size() == 1 && shorterThen(p0 - paths[path_idx_last].points[0], path->config->getLineWidth() * 2))
         {
             p0 = paths[path_idx_last].points[0];
             path_idx_last ++;

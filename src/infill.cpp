@@ -54,7 +54,7 @@ void Infill::generate(Polygons& result_polygons, Polygons& result_lines, Polygon
       
 void generateConcentricInfillDense(Polygons outline, Polygons& result, Polygons* in_between, int extrusionWidth, bool avoidOverlappingPerimeters)
 {
-    while(outline.size() > 0)
+    while (outline.size() > 0)
     {
         for (unsigned int polyNr = 0; polyNr < outline.size(); polyNr++)
         {
@@ -70,7 +70,7 @@ void generateConcentricInfillDense(Polygons outline, Polygons& result, Polygons*
 
 void generateConcentricInfill(Polygons outline, Polygons& result, int inset_value)
 {
-    while(outline.size() > 0)
+    while (outline.size() > 0)
     {
         for (unsigned int polyNr = 0; polyNr < outline.size(); polyNr++)
         {

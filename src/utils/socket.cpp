@@ -76,7 +76,7 @@ void ClientSocket::sendAll(const void* data, int length)
     if (sockfd == -1)
         return;
     const char* ptr = static_cast<const char*>(data);
-    while(length > 0)
+    while (length > 0)
     {
         int n = send(sockfd, ptr, length, 0);
         if (n <= 0)
@@ -108,7 +108,7 @@ void ClientSocket::recvAll(void* data, int length)
     if (sockfd == -1)
         return;
     char* ptr = static_cast<char*>(data);
-    while(length > 0)
+    while (length > 0)
     {
         int n = recv(sockfd, ptr, length, 0);
         if (n == 0)

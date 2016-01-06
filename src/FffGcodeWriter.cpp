@@ -473,7 +473,7 @@ std::vector<unsigned int> FffGcodeWriter::calculateMeshOrder(SliceDataStorage& s
         add_list.push_back(mesh_idx);
 
     int add_extruder_nr = current_extruder;
-    while(add_list.size() > 0)
+    while (add_list.size() > 0)
     {
         for(auto add_it = add_list.begin(); add_it != add_list.end(); )
         {

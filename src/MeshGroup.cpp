@@ -15,7 +15,7 @@ FILE* binaryMeshBlob = nullptr;
 /* Custom fgets function to support Mac line-ends in Ascii STL files. OpenSCAD produces this when used on Mac */
 void* fgets_(char* ptr, size_t len, FILE* f)
 {
-    while(len && fread(ptr, 1, 1, f) > 0)
+    while (len && fread(ptr, 1, 1, f) > 0)
     {
         if (*ptr == '\n' || *ptr == '\r')
         {
@@ -35,7 +35,7 @@ bool loadMeshSTL_ascii(Mesh* mesh, const char* filename, FMatrix3x3& matrix)
     FPoint3 vertex;
     int n = 0;
     Point3 v0(0,0,0), v1(0,0,0), v2(0,0,0);
-    while(fgets_(buffer, sizeof(buffer), f))
+    while (fgets_(buffer, sizeof(buffer), f))
     {
         if (sscanf(buffer, " vertex %f %f %f", &vertex.x, &vertex.y, &vertex.z) == 3)
         {

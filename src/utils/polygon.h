@@ -16,7 +16,7 @@
 #ifdef CHECK_POLY_ACCESS
 #define POLY_ASSERT(e) assert(e)
 #else
-#define POLY_ASSERT(e) do {} while(0)
+#define POLY_ASSERT(e) do {} while (0)
 #endif
 
 namespace cura {

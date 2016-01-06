@@ -263,7 +263,7 @@ void PrimeTower::addToGcode_OLD(SliceDataStorage& storage, GCodePlanner& gcodeLa
             insets.push_back(storage.primeTower.ground_poly.offset(offset / 2));
         else
             insets.push_back(storage.primeTower.ground_poly);
-        while(true)
+        while (true)
         {
             Polygons new_inset = insets[insets.size() - 1].offset(offset);
             if (new_inset.size() < 1)

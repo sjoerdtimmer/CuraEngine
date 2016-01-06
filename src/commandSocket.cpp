@@ -115,7 +115,7 @@ void CommandSocket::connect(const std::string& ip, int port)
     bool slice_another_time = true;
     
     // Start & continue listening as long as socket is not closed and there is no error.
-    while(private_data->socket->state() != Arcus::SocketState::Closed && private_data->socket->state() != Arcus::SocketState::Error && slice_another_time)
+    while (private_data->socket->state() != Arcus::SocketState::Closed && private_data->socket->state() != Arcus::SocketState::Error && slice_another_time)
     {
         // Actually start handling messages.
         Arcus::MessagePtr message = private_data->socket->takeNextMessage();
