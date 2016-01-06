@@ -333,7 +333,7 @@ void generateZigZagIninfill_endPieces(const Polygons& in_outline, Polygons& resu
                 {
                     if (last_isEvenScanSegment && (connect_zigzags || !isEvenScanSegment))
                     {
-                        addLine(lastPoint, Point(x,y));
+                        addLine(lastPoint, Point(x, y));
                     }
                     else if (connect_zigzags && !last_isEvenScanSegment && !isEvenScanSegment) // if we end an uneven boundary in an uneven segment
                     { // add whole unevenBoundarySegment (including the just obtained point)
@@ -341,12 +341,12 @@ void generateZigZagIninfill_endPieces(const Polygons& in_outline, Polygons& resu
                         {
                             addLine(unevenBoundarySegment[p-1], unevenBoundarySegment[p]);
                         }
-                        addLine(unevenBoundarySegment[unevenBoundarySegment.size()-1], Point(x,y));
+                        addLine(unevenBoundarySegment[unevenBoundarySegment.size()-1], Point(x, y));
                         unevenBoundarySegment.clear();
                     } 
                     if (connect_zigzags && last_isEvenScanSegment && !isEvenScanSegment)
                     {
-                        unevenBoundarySegment.push_back(Point(x,y));
+                        unevenBoundarySegment.push_back(Point(x, y));
                     }
                     else 
                     {
@@ -354,11 +354,11 @@ void generateZigZagIninfill_endPieces(const Polygons& in_outline, Polygons& resu
                     }
 
                 }
-                lastPoint = Point(x,y);
+                lastPoint = Point(x, y);
 
                 if (isFirstBoundarySegment) 
                 {
-                    firstBoundarySegment.emplace_back(x,y);
+                    firstBoundarySegment.emplace_back(x, y);
                     firstBoundarySegmentEndsInEven = isEvenScanSegment;
                     isFirstBoundarySegment = false;
                 }
@@ -520,13 +520,13 @@ void generateZigZagIninfill_noEndPieces(const Polygons& in_outline, Polygons& re
                         {
                             addLine(boundarySegment[polyline_point_idx-1], boundarySegment[polyline_point_idx]);
                         }
-                        addLine(boundarySegment[boundarySegment.size()-1], Point(x,y));
+                        addLine(boundarySegment[boundarySegment.size()-1], Point(x, y));
                         boundarySegment.clear();
                     } 
                     else if (isEvenScanSegment) // we are either in an end piece or an uneven boundary segment
                     {
                         boundarySegment.clear();
-                        boundarySegment.emplace_back(x,y);
+                        boundarySegment.emplace_back(x, y);
                     } 
                     else
                     {
@@ -536,10 +536,10 @@ void generateZigZagIninfill_noEndPieces(const Polygons& in_outline, Polygons& re
 
                 if (isFirstBoundarySegment) 
                 {
-                    firstBoundarySegment.emplace_back(x,y);
+                    firstBoundarySegment.emplace_back(x, y);
                     firstBoundarySegmentEndsInEven = isEvenScanSegment;
                     isFirstBoundarySegment = false;
-                    boundarySegment.emplace_back(x,y);
+                    boundarySegment.emplace_back(x, y);
                 }
             }
             if (!isFirstBoundarySegment && isEvenScanSegment)

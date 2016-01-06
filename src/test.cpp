@@ -15,16 +15,16 @@ void test_poly_inside_and_centerOfMass()
 {
     {
         Polygon poly;
-        poly.add(Point(2000,2000));  //     /
-        poly.add(Point(1000,1000));  //   / /
-        poly.add(Point(1100,100));   //   |/
+        poly.add(Point(2000, 2000));  //     /
+        poly.add(Point(1000, 1000));  //   / /
+        poly.add(Point(1100, 100));   //   |/
         
-        assert (!poly.inside(Point(-2000,1000)));
-        assert (poly.inside(Point(1010,1000)));
-        assert (!poly.inside(Point(5000,1000)));
-        assert (poly.inside(Point(1111,1100)));
-        assert (!poly.inside(Point(2001,2001)));
-        assert (poly.inside(Point(1999,1998)));
+        assert (!poly.inside(Point(-2000, 1000)));
+        assert (poly.inside(Point(1010, 1000)));
+        assert (!poly.inside(Point(5000, 1000)));
+        assert (poly.inside(Point(1111, 1100)));
+        assert (!poly.inside(Point(2001, 2001)));
+        assert (poly.inside(Point(1999, 1998)));
 
         std::cerr << "poly.centerOfMass() = " << poly.centerOfMass() << std::endl;
         Point center = poly.centerOfMass();
@@ -48,18 +48,18 @@ void test_poly_inside_and_centerOfMass()
     }
     {
         Polygon poly;
-        poly.add(Point(0,0));
-        poly.add(Point(100,0));    //
-        poly.add(Point(100,100));  //  |\  /|
-        poly.add(Point(50,50));    //  | \/ |
-        poly.add(Point(0,100));    //  |____|
+        poly.add(Point(0, 0));
+        poly.add(Point(100, 0));    //
+        poly.add(Point(100, 100));  //  |\  /|
+        poly.add(Point(50, 50));    //  | \/ |
+        poly.add(Point(0, 100));    //  |____|
         
-        assert (poly.inside(Point(60,50)));
-        assert (!poly.inside(Point(50,60)));
-        assert (poly.inside(Point(60,40)));
-        assert (poly.inside(Point(50,40)));
-        assert (!poly.inside(Point(-1,100)));
-        assert (!poly.inside(Point(-10,-10)));
+        assert (poly.inside(Point(60, 50)));
+        assert (!poly.inside(Point(50, 60)));
+        assert (poly.inside(Point(60, 40)));
+        assert (poly.inside(Point(50, 40)));
+        assert (!poly.inside(Point(-1, 100)));
+        assert (!poly.inside(Point(-10, -10)));
         
         std::cerr << "poly.centerOfMass() = " << poly.centerOfMass() << std::endl;
         Point center = poly.centerOfMass();
@@ -83,19 +83,19 @@ void test_poly_inside_and_centerOfMass()
     }
     {
         Polygon poly;
-        poly.add(Point(   0,2000));  //   |\    .
-        poly.add(Point(   0,   0));  //   | >   .
-        poly.add(Point(1000,1000));  //   |/
+        poly.add(Point(   0, 2000));  //   |\    .
+        poly.add(Point(   0,    0));  //   | >   .
+        poly.add(Point(1000, 1000));  //   |/
         
-        assert (poly.inside(Point(500,1000)));
-        assert (poly.inside(Point(200,500)));
-        assert (poly.inside(Point(200,1500)));
-        assert (poly.inside(Point(800,1000)));
-        assert (!poly.inside(Point(-10,1000)));
-        assert (!poly.inside(Point(1100,1000)));
-        assert (!poly.inside(Point(600,500)));
-        assert (!poly.inside(Point(600,1500)));
-        assert (!poly.inside(Point(2000,1000)));
+        assert (poly.inside(Point(500, 1000)));
+        assert (poly.inside(Point(200, 500)));
+        assert (poly.inside(Point(200, 1500)));
+        assert (poly.inside(Point(800, 1000)));
+        assert (!poly.inside(Point(-10, 1000)));
+        assert (!poly.inside(Point(1100, 1000)));
+        assert (!poly.inside(Point(600, 500)));
+        assert (!poly.inside(Point(600, 1500)));
+        assert (!poly.inside(Point(2000, 1000)));
         
         std::cerr << "poly.centerOfMass() = " << poly.centerOfMass() << std::endl;
         Point center = poly.centerOfMass();
@@ -124,7 +124,7 @@ struct LocationItem
     Point p;
     int i;
     LocationItem(Point p, int i) : p(p), i(i) {};
-    LocationItem() : p(0,0), i(-1) {};
+    LocationItem() : p(0, 0), i(-1) {};
 };
 
 #include "utils/BucketGrid2D.h"
@@ -138,14 +138,14 @@ void test_BucketGrid2D()
         LocationItem li(p, i);
         bg.insert(p, li);
     }
-//     {Point p(00,00); int i = 1; bg.insert(p, i);}
-//     {Point p(05,05); int i = 2; bg.insert(p, i);}
-//     {Point p(14,15); int i = 3; bg.insert(p, i);}
-//     {Point p(25,25); int i = 4; bg.insert(p, i);}
-//     {Point p(39,39); int i = 5; bg.insert(p, i);}
-//     {Point p(300,300); int i = 6; bg.insert(p, i);}
+//     {Point p(00, 00); int i = 1; bg.insert(p, i);}
+//     {Point p(05, 05); int i = 2; bg.insert(p, i);}
+//     {Point p(14, 15); int i = 3; bg.insert(p, i);}
+//     {Point p(25, 25); int i = 4; bg.insert(p, i);}
+//     {Point p(39, 39); int i = 5; bg.insert(p, i);}
+//     {Point p(300, 300); int i = 6; bg.insert(p, i);}
     
-    Point to(rand()%100000,rand()%100000);
+    Point to(rand()%100000, rand()%100000);
     std::cerr << to << std::endl;
     LocationItem result;
     if (bg.findNearestObject(to, result))
@@ -170,18 +170,18 @@ void test_findClosestConnection()
     if (false)
     {
         Polygon poly2;
-        poly2.add(Point(0,300));
-        poly2.add(Point(100,300));    //   ____
-        poly2.add(Point(100,200));    //  |    |
-        poly2.add(Point(50,250));     //  | /\ |
-        poly2.add(Point(0,200));      //  |/  \|
+        poly2.add(Point(0, 300));
+        poly2.add(Point(100, 300));    //   ____
+        poly2.add(Point(100, 200));    //  |    |
+        poly2.add(Point(50, 250));     //  | /\ |
+        poly2.add(Point(0, 200));      //  |/  \|
         
         Polygon poly1;
-        poly1.add(Point(0,0));
-        poly1.add(Point(100,0));    //
-        poly1.add(Point(100,100));  //  |\  /|
-        poly1.add(Point(50,50));    //  | \/ |
-        poly1.add(Point(0,100));    //  |____|
+        poly1.add(Point(0, 0));
+        poly1.add(Point(100, 0));    //
+        poly1.add(Point(100, 100));  //  |\  /|
+        poly1.add(Point(50, 50));    //  | \/ |
+        poly1.add(Point(0, 100));    //  |____|
         
         ClosestPolygonPoint result1 (poly1);
         ClosestPolygonPoint result2 (poly2);
@@ -193,18 +193,18 @@ void test_findClosestConnection()
     if (false)
     {
         Polygon poly2;
-        poly2.add(Point(0,300));
-        poly2.add(Point(100,300));    //   ____
-        poly2.add(Point(100,200));    //  |    |
-        poly2.add(Point(50,250));     //  | /\ |
-        poly2.add(Point(10,105));     //  |/  \|
+        poly2.add(Point(0, 300));
+        poly2.add(Point(100, 300));    //   ____
+        poly2.add(Point(100, 200));    //  |    |
+        poly2.add(Point(50, 250));     //  | /\ |
+        poly2.add(Point(10, 105));     //  |/  \|
         
         Polygon poly1;
-        poly1.add(Point(0,0));
-        poly1.add(Point(100,0));    //
-        poly1.add(Point(100,100));  //  |\  /|
-        poly1.add(Point(50,50));    //  | \/ |
-        poly1.add(Point(0,100));    //  |____|
+        poly1.add(Point(0, 0));
+        poly1.add(Point(100, 0));    //
+        poly1.add(Point(100, 100));  //  |\  /|
+        poly1.add(Point(50, 50));    //  | \/ |
+        poly1.add(Point(0, 100));    //  |____|
         
         ClosestPolygonPoint result1 (poly1);
         ClosestPolygonPoint result2 (poly2);

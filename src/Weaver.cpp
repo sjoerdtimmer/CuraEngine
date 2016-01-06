@@ -69,7 +69,7 @@ void Weaver::weave(MeshGroup* meshgroup)
         if (wireFrame.bottom_outline.size() > 0)
             starting_point_in_layer = (wireFrame.bottom_outline.max() + wireFrame.bottom_outline.min()) / 2;
         else 
-            starting_point_in_layer = (Point(0,0) + meshgroup->max() + meshgroup->min()) / 2;
+            starting_point_in_layer = (Point(0, 0) + meshgroup->max() + meshgroup->min()) / 2;
         
         Progress::messageProgressStage(Progress::Stage::INSET, nullptr);
         for (int layer_idx = starting_layer_idx + 1; layer_idx < layer_count; layer_idx++)

@@ -34,7 +34,7 @@ bool loadMeshSTL_ascii(Mesh* mesh, const char* filename, FMatrix3x3& matrix)
     char buffer[1024];
     FPoint3 vertex;
     int n = 0;
-    Point3 v0(0,0,0), v1(0,0,0), v2(0,0,0);
+    Point3 v0(0, 0, 0), v1(0, 0, 0), v2(0, 0, 0);
     while (fgets_(buffer, sizeof(buffer), f))
     {
         if (sscanf(buffer, " vertex %f %f %f", &vertex.x, &vertex.y, &vertex.z) == 3)
@@ -79,7 +79,7 @@ bool loadMeshSTL_binary(Mesh* mesh, const char* filename, FMatrix3x3& matrix)
         return false;
     }
     //For each face read:
-    //float(x,y,z) = normal, float(X,Y,Z)*3 = vertexes, uint16_t = flags
+    //float(x, y, z) = normal, float(X, Y, Z)*3 = vertexes, uint16_t = flags
     // Every Face is 50 Bytes: Normal(3*float), Vertices(9*float), 2 Bytes Spacer
     mesh->faces.reserve(faceCount);
     mesh->vertices.reserve(faceCount);
@@ -141,7 +141,7 @@ bool loadMeshIntoMeshGroup(MeshGroup* meshgroup, const char* filename, FMatrix3x
     if (ext && (strcmp(ext, ".stl") == 0 || strcmp(ext, ".STL") == 0))
     {
         Mesh mesh = object_parent_settings ? Mesh(object_parent_settings) : Mesh(meshgroup); //If we have object_parent_settings, use them as parent settings. Otherwise, just use meshgroup.
-        if (loadMeshSTL(&mesh,filename,transformation)) //Load it! If successful...
+        if (loadMeshSTL(&mesh, filename, transformation)) //Load it! If successful...
         {
             meshgroup->meshes.push_back(mesh);
             return true;

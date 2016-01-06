@@ -113,8 +113,8 @@ bool Comb::calc(Point startPoint, Point endPoint, CombPaths& combPaths, bool sta
             inside_middle_from = middle_from_cp.location;
             middle_to = middle_to_cp.location;
             inside_middle_to = middle_to_cp.location;
-            PolygonUtils::moveInside(boundary_inside,inside_middle_from,offset_dist_to_get_from_on_the_polygon_to_outside,max_comb_distance_ignored); //Also move the intermediary waypoint inside if it isn't yet.
-            PolygonUtils::moveInside(boundary_inside,inside_middle_to,offset_dist_to_get_from_on_the_polygon_to_outside,max_comb_distance_ignored);
+            PolygonUtils::moveInside(boundary_inside, inside_middle_from, offset_dist_to_get_from_on_the_polygon_to_outside, max_comb_distance_ignored); //Also move the intermediary waypoint inside if it isn't yet.
+            PolygonUtils::moveInside(boundary_inside, inside_middle_to, offset_dist_to_get_from_on_the_polygon_to_outside, max_comb_distance_ignored);
         }
         else if (!startInside && !endInside)
         {
@@ -127,19 +127,19 @@ bool Comb::calc(Point startPoint, Point endPoint, CombPaths& combPaths, bool sta
         {
             middle_from = startPoint;
             inside_middle_from = startPoint;
-            ClosestPolygonPoint middle_to_cp = PolygonUtils::findClosest(middle_from,boundary_inside[end_part_boundary_poly_idx]);
+            ClosestPolygonPoint middle_to_cp = PolygonUtils::findClosest(middle_from, boundary_inside[end_part_boundary_poly_idx]);
             middle_to = middle_to_cp.location;
             inside_middle_to = middle_to_cp.location;
-            PolygonUtils::moveInside(boundary_inside,inside_middle_to,offset_dist_to_get_from_on_the_polygon_to_outside,max_comb_distance_ignored);
+            PolygonUtils::moveInside(boundary_inside, inside_middle_to, offset_dist_to_get_from_on_the_polygon_to_outside, max_comb_distance_ignored);
         }
         else if (startInside && !endInside)
         {
             middle_to = endPoint;
             inside_middle_to = endPoint;
-            ClosestPolygonPoint middle_from_cp = PolygonUtils::findClosest(middle_to,boundary_inside[start_part_boundary_poly_idx]);
+            ClosestPolygonPoint middle_from_cp = PolygonUtils::findClosest(middle_to, boundary_inside[start_part_boundary_poly_idx]);
             middle_from = middle_from_cp.location;
             inside_middle_from = middle_from_cp.location;
-            PolygonUtils::moveInside(boundary_inside,inside_middle_from,offset_dist_to_get_from_on_the_polygon_to_outside,max_comb_distance_ignored);
+            PolygonUtils::moveInside(boundary_inside, inside_middle_from, offset_dist_to_get_from_on_the_polygon_to_outside, max_comb_distance_ignored);
         }
         
         if (startInside)

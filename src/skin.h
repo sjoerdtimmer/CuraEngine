@@ -83,7 +83,7 @@ void generateInfill(int layerNr, SliceMeshStorage& storage, int extrusionWidth, 
  * \param storage The mesh to combine the infill layers of.
  * \param amount The number of layers to combine.
  */
-void combineInfillLayers(SliceMeshStorage& storage,unsigned int amount);
+void combineInfillLayers(SliceMeshStorage& storage, unsigned int amount);
 
 }//namespace cura
 

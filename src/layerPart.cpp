@@ -85,7 +85,7 @@ void layerparts2HTML(SliceDataStorage& storage, const char* filename, bool all_l
 //                 {
 //                     fprintf(out, "<polygon points=\"");
 //                     for(unsigned int k=0;k<part.outline[j].size();k++)
-//                         fprintf(out, "%f,%f ", float(part.outline[j][k].X - modelMin.x)/modelSize.x*500, float(part.outline[j][k].Y - modelMin.y)/modelSize.y*500);
+//                         fprintf(out, "%f, %f ", float(part.outline[j][k].X - modelMin.x)/modelSize.x*500, float(part.outline[j][k].Y - modelMin.y)/modelSize.y*500);
 //                     if (j == 0)
 //                         fprintf(out, "\" style=\"fill:gray; stroke:black;stroke-width:1\" />\n");
 //                     else

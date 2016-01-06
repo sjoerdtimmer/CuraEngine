@@ -197,7 +197,7 @@ public:
      * Care needs to be taken, if p.Y exactly matches a vertex to the right of p, then we need to count 1 intersect if the
      * outline passes vertically past; and 0 (or 2) intersections if that point on the outline is a 'top' or 'bottom' vertex.
      * The easiest way to do this is to break out two cases for increasing and decreasing Y ( from p0 to p1 ).
-     * A segment is tested if pa.Y <= p.Y < pb.Y, where pa and pb are the points (from p0,p1) with smallest & largest Y.
+     * A segment is tested if pa.Y <= p.Y < pb.Y, where pa and pb are the points (from p0, p1) with smallest & largest Y.
      * When both have the same Y, no intersections are counted but there is a special test to see if the point falls
      * exactly on the line.
      * 
@@ -420,7 +420,7 @@ public:
      * Care needs to be taken, if p.Y exactly matches a vertex to the right of p, then we need to count 1 intersect if the
      * outline passes vertically past; and 0 (or 2) intersections if that point on the outline is a 'top' or 'bottom' vertex.
      * The easiest way to do this is to break out two cases for increasing and decreasing Y ( from p0 to p1 ).
-     * A segment is tested if pa.Y <= p.Y < pb.Y, where pa and pb are the points (from p0,p1) with smallest & largest Y.
+     * A segment is tested if pa.Y <= p.Y < pb.Y, where pa and pb are the points (from p0, p1) with smallest & largest Y.
      * When both have the same Y, no intersections are counted but there is a special test to see if the point falls
      * exactly on the line.
      * 

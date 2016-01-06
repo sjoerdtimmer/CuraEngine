@@ -207,7 +207,7 @@ void Wireframe2gcode::go_down(WeaveLayer& layer, WeaveConnectionPart& part, unsi
     if (up_dist_half_speed > 0)
     {
         
-        gcode.writeMove(Point3(0,0,up_dist_half_speed) + gcode.getPosition(), speedUp / 2, extrusion_per_mm_connection * 2);
+        gcode.writeMove(Point3(0, 0, up_dist_half_speed) + gcode.getPosition(), speedUp / 2, extrusion_per_mm_connection * 2);
     }
 }
 

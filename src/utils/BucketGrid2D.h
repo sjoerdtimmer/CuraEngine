@@ -135,7 +135,7 @@ public:
         {
             for (int y = -1; y <= 1; y++)
             {
-                int bucket_idx = point2object.bucket(getRelativeForHash(p, Point(x,y))); // when the hash is not a hash of a present item, the bucket_idx returned may be one already encountered
+                int bucket_idx = point2object.bucket(getRelativeForHash(p, Point(x, y))); // when the hash is not a hash of a present item, the bucket_idx returned may be one already encountered
                 for ( auto local_it = point2object.begin(bucket_idx); local_it!= point2object.end(bucket_idx); ++local_it )
                 {
                     ret.push_back(local_it->second);
@@ -174,7 +174,7 @@ public:
         {
             for (int y = -1; y <= 1; y++)
             {
-                int bucket_idx = point2object.bucket(getRelativeForHash(p, Point(x,y)));
+                int bucket_idx = point2object.bucket(getRelativeForHash(p, Point(x, y)));
                 for ( auto local_it = point2object.begin(bucket_idx); local_it!= point2object.end(bucket_idx); ++local_it )
                 {
                     int32_t dist2 = vSize2(local_it->first - p);

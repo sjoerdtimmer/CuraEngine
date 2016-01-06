@@ -18,7 +18,7 @@ They represent millimeters in 3D space.
 class FPoint3
 {
 public:
-    float x,y,z;
+    float x, y, z;
     FPoint3() {}
     FPoint3(float _x, float _y, float _z): x(_x), y(_y), z(_z) {}
     FPoint3(const Point3& p): x(p.x*.001), y(p.y*.001), z(p.z*.001) {}

@@ -56,7 +56,7 @@ public:
         out = fopen(filename, "w");
         if (!out)
         {
-            logError("The file %s could not be opened for writing.",filename);
+            logError("The file %s could not be opened for writing.", filename);
         }
         fprintf(out, "<!DOCTYPE html><html><body>\n");
         fprintf(out, "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" style=\"width:%llipx;height:%llipx\">\n", canvas_size.X, canvas_size.Y);
@@ -78,7 +78,7 @@ public:
      */
     Point transform(const Point& p) 
     {
-        return Point((p.X-aabb.min.X)*scale, (p.Y-aabb.min.Y)*scale) + Point(10,10);
+        return Point((p.X-aabb.min.X)*scale, (p.Y-aabb.min.Y)*scale) + Point(10, 10);
     }
 
 private:
@@ -140,25 +140,25 @@ public:
         }
     }
     
-    void writeAreas(std::vector<Point> polygon,Color color = Color::GRAY,Color outline_color = Color::BLACK)
+    void writeAreas(std::vector<Point> polygon, Color color = Color::GRAY, Color outline_color = Color::BLACK)
     {
-        fprintf(out,"<polygon fill=\"%s\" stroke=\"%s\" stroke-width=\"1\" points=\"",toString(color).c_str(),toString(outline_color).c_str()); //The beginning of the polygon tag.
+        fprintf(out, "<polygon fill=\"%s\" stroke=\"%s\" stroke-width=\"1\" points=\"", toString(color).c_str(), toString(outline_color).c_str()); //The beginning of the polygon tag.
         for(Point& point : polygon) //Add every point to the list of points.
         {
             Point transformed = transform(point);
-            fprintf(out,"%lli,%lli ",transformed.X,transformed.Y);
+            fprintf(out, "%lli,%lli ",transformed.X,transformed.Y);
         }
-        fprintf(out,"\" />\n"); //The end of the polygon tag.
+        fprintf(out, "\" />\n"); //The end of the polygon tag.
     }
     
     void writePoint(const Point& p, bool write_coords=false, int size = 5, Color color = Color::BLACK)
     {
         Point pf = transform(p);
-        fprintf(out, "<circle cx=\"%lli\" cy=\"%lli\" r=\"%d\" stroke=\"%s\" stroke-width=\"1\" fill=\"%s\" />\n",pf.X, pf.Y, size, toString(color).c_str(), toString(color).c_str());
+        fprintf(out, "<circle cx=\"%lli\" cy=\"%lli\" r=\"%d\" stroke=\"%s\" stroke-width=\"1\" fill=\"%s\" />\n", pf.X, pf.Y, size, toString(color).c_str(), toString(color).c_str());
         
         if (write_coords)
         {
-            fprintf(out, "<text x=\"%lli\" y=\"%lli\" style=\"font-size: 10;\" fill=\"black\">%lli,%lli</text>\n",pf.X, pf.Y, p.X, p.Y);
+            fprintf(out, "<text x=\"%lli\" y=\"%lli\" style=\"font-size: 10;\" fill=\"black\">%lli,%lli</text>\n", pf.X, pf.Y, p.X, p.Y);
         }
     }
     void writePoints(PolygonRef poly, bool write_coords=false, int size = 5, Color color = Color::BLACK)
@@ -188,7 +188,7 @@ public:
      * \param color The colour of the line segments. If this is not specified,
      * black will be used.
      */
-    void writeLines(std::vector<Point> polyline,Color color = Color::BLACK)
+    void writeLines(std::vector<Point> polyline, Color color = Color::BLACK)
     {
         if (polyline.size() <= 1) //Need at least 2 points.
         {
@@ -196,13 +196,13 @@ public:
         }
         
         Point transformed = transform(polyline[0]); //Element 0 must exist due to the check above.
-        fprintf(out,"<path fill=\"none\" stroke=\"%s\" stroke-width=\"1\" d=\"M%lli,%lli",toString(color).c_str(),transformed.X,transformed.Y); //Write the start of the path tag and the first endpoint.
+        fprintf(out, "<path fill=\"none\" stroke=\"%s\" stroke-width=\"1\" d=\"M%lli,%lli",toString(color).c_str(), transformed.X, transformed.Y); //Write the start of the path tag and the first endpoint.
         for(size_t point = 1;point < polyline.size();point++)
         {
             transformed = transform(polyline[point]);
-            fprintf(out,"L%lli,%lli",transformed.X,transformed.Y); //Write a line segment to the next point.
+            fprintf(out, "L%lli,%lli", transformed.X, transformed.Y); //Write a line segment to the next point.
         }
-        fprintf(out,"\" />\n"); //Write the end of the tag.
+        fprintf(out, "\" />\n"); //Write the end of the tag.
     }
     
     void writeLine(const Point& a, const Point& b, Color color = Color::BLACK)
@@ -221,11 +221,11 @@ public:
      * \param b The ending endpoint of the line.
      * \param color The stroke colour of the line.
      */
-    void writeDashedLine(const Point& a,const Point& b,Color color = Color::BLACK)
+    void writeDashedLine(const Point& a, const Point& b, Color color = Color::BLACK)
     {
         Point fa = transform(a);
         Point fb = transform(b);
-        fprintf(out,"<line x1=\"%lli\" y1=\"%lli\" x2=\"%lli\" y2=\"%lli\" stroke=\"%s\" stroke-width=\"1\" stroke-dasharray=\"5,5\" />\n",fa.X,fa.Y,fb.X,fb.Y,toString(color).c_str());
+        fprintf(out, "<line x1=\"%lli\" y1=\"%lli\" x2=\"%lli\" y2=\"%lli\" stroke=\"%s\" stroke-width=\"1\" stroke-dasharray=\"5,5\" />\n", fa.X, fa.Y, fb.X, fb.Y, toString(color).c_str());
     }
 
     template<typename... Args>

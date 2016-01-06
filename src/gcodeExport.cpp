@@ -11,7 +11,7 @@ namespace cura {
 
 GCodeExport::GCodeExport()
 : output_stream(&std::cout)
-, currentPosition(0,0,MM2INT(20))
+, currentPosition(0, 0, MM2INT(20))
 , layer_nr(0)
 {
     current_e_value = 0;
@@ -48,11 +48,11 @@ Point GCodeExport::getGcodePos(int64_t x, int64_t y, int extruder_train)
 {
     if (use_extruder_offset_to_offset_coords)
     {
-        return Point(x,y) - getExtruderOffset(extruder_train);
+        return Point(x, y) - getExtruderOffset(extruder_train);
     }
     else
     {
-        return Point(x,y);
+        return Point(x, y);
     }
 }
 
@@ -281,7 +281,7 @@ void GCodeExport::writeMoveBFB(int x, int y, int z, double speed, double extrusi
         extrusion_per_mm = extrusion_mm3_per_mm / extruder_attr[current_extruder].filament_area;
     }
     
-    Point gcode_pos = getGcodePos(x,y, current_extruder);
+    Point gcode_pos = getGcodePos(x, y, current_extruder);
     
     //For Bits From Bytes machines, we need to handle this completely differently. As they do not use E values but RPM values.
     float fspeed = speed * 60;
@@ -308,7 +308,7 @@ void GCodeExport::writeMoveBFB(int x, int y, int z, double speed, double extrusi
         fspeed *= (rpm / (roundf(rpm * 100) / 100));
 
         //Increase the extrusion amount to calculate the amount of filament used.
-        Point3 diff = Point3(x,y,z) - getPosition();
+        Point3 diff = Point3(x, y, z) - getPosition();
         
         current_e_value += extrusion_per_mm * diff.vSizeMM();
     }
@@ -338,7 +338,7 @@ void GCodeExport::writeMove(int x, int y, int z, double speed, double extrusion_
 #ifdef ASSERT_INSANE_OUTPUT
     assert(speed < 200 && speed > 1); // normal F values occurring in UM2 gcode (this code should not be compiled for release)
     assert(currentPosition != no_point3);
-    assert((Point3(x,y,z) - currentPosition).vSize() < MM2INT(300)); // no crazy positions (this code should not be compiled for release)
+    assert((Point3(x, y, z) - currentPosition).vSize() < MM2INT(300)); // no crazy positions (this code should not be compiled for release)
 #endif //ASSERT_INSANE_OUTPUT
 
     if (extrusion_mm3_per_mm < 0)
@@ -356,11 +356,11 @@ void GCodeExport::writeMove(int x, int y, int z, double speed, double extrusion_
         extrusion_per_mm = extrusion_mm3_per_mm / extruder_attr[current_extruder].filament_area;
     }
 
-    Point gcode_pos = getGcodePos(x,y, current_extruder);
+    Point gcode_pos = getGcodePos(x, y, current_extruder);
 
     if (extrusion_mm3_per_mm > 0.000001)
     {
-        Point3 diff = Point3(x,y,z) - getPosition();
+        Point3 diff = Point3(x, y, z) - getPosition();
         if (isZHopped > 0)
         {
             *output_stream << std::setprecision(3) << "G1 Z" << INT2MM(currentPosition.z) << "\n";

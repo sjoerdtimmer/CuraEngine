@@ -163,7 +163,7 @@ void generateInfill(int layerNr, SliceMeshStorage& storage, int extrusionWidth, 
     }
 }
 
-void combineInfillLayers(SliceMeshStorage& storage,unsigned int amount)
+void combineInfillLayers(SliceMeshStorage& storage, unsigned int amount)
 {
     if (amount <= 1) //If we must combine 1 layer, nothing needs to be combined. Combining 0 layers is invalid.
     {

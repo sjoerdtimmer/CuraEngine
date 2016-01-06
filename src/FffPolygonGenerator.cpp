@@ -49,13 +49,13 @@ bool FffPolygonGenerator::sliceModel(MeshGroup* meshgroup, TimeKeeper& timeKeepe
     int initial_layer_thickness = meshgroup->getSettingInMicrons("layer_height_0");
     if (initial_layer_thickness <= 0) //Initial layer height of 0 is not allowed. Negative layer height is nonsense.
     {
-        logError("Initial layer height %i is disallowed.",initial_layer_thickness);
+        logError("Initial layer height %i is disallowed.", initial_layer_thickness);
         return false;
     }
     int layer_thickness = meshgroup->getSettingInMicrons("layer_height");
     if (layer_thickness <= 0) //Layer height of 0 is not allowed. Negative layer height is nonsense.
     {
-        logError("Layer height %i is disallowed.",layer_thickness);
+        logError("Layer height %i is disallowed.", layer_thickness);
         return false;
     }
     if (meshgroup->getSettingAsPlatformAdhesion("adhesion_type") == EPlatformAdhesion::RAFT) 
@@ -66,7 +66,7 @@ bool FffPolygonGenerator::sliceModel(MeshGroup* meshgroup, TimeKeeper& timeKeepe
     int layer_count = (storage.model_max.z - initial_slice_z) / layer_thickness + 1;
     if (layer_count <= 0) //Model is shallower than layer_height_0, so not even the first layer is sliced. Return an empty model then.
     {
-        Progress::messageProgressStage(Progress::Stage::INSET,&timeKeeper); //Continue directly with the inset stage, which will also immediately stop.
+        Progress::messageProgressStage(Progress::Stage::INSET, &timeKeeper); //Continue directly with the inset stage, which will also immediately stop.
         return true; //This is NOT an error state!
     }
 
@@ -196,10 +196,10 @@ void FffPolygonGenerator::slices2polygons(SliceDataStorage& storage, TimeKeeper&
         Progress::messageProgress(Progress::Stage::SKIN, layer_number+1, total_layers);
     }
     
-    unsigned int combined_infill_layers = storage.getSettingInMicrons("infill_sparse_thickness") / std::max(storage.getSettingInMicrons("layer_height"),1); //How many infill layers to combine to obtain the requested sparse thickness.
+    unsigned int combined_infill_layers = storage.getSettingInMicrons("infill_sparse_thickness") / std::max(storage.getSettingInMicrons("layer_height"), 1); //How many infill layers to combine to obtain the requested sparse thickness.
     for(SliceMeshStorage& mesh : storage.meshes)
     {
-        combineInfillLayers(mesh,combined_infill_layers);
+        combineInfillLayers(mesh, combined_infill_layers);
     }
 
     storage.primeTower.computePrimeTowerMax(storage);

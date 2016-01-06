@@ -69,8 +69,8 @@ public:
     void clear(); //!< clears all data
     void finish(); //!< complete the model : set the connected_face_index fields of the faces.
 
-    Point3 min(); //!< min (in x,y and z) vertex of the bounding box
-    Point3 max(); //!< max (in x,y and z) vertex of the bounding box
+    Point3 min(); //!< min (in x, y and z) vertex of the bounding box
+    Point3 max(); //!< max (in x, y and z) vertex of the bounding box
     
     /*!
      * Offset the whole mesh (all vertices and the bounding box).
@@ -78,7 +78,7 @@ public:
      */
     void offset(Point3 offset)
     {
-        if (offset == Point3(0,0,0))
+        if (offset == Point3(0, 0, 0))
         {
             return;
         }

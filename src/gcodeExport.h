@@ -157,7 +157,7 @@ private:
         std::deque<double> extruded_volume_at_previous_n_retractions; // in mm^3
 
         ExtruderTrainAttributes()
-        : nozzle_offset(0,0)
+        : nozzle_offset(0, 0)
         , extruderCharacter(0)
         , start_code("")
         , end_code("")

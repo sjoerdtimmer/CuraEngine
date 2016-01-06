@@ -56,7 +56,7 @@ enum class EGCodeFlavor
 /**
  * Bits From Bytes GCode.
  *  BFB machines use RPM instead of E. Which is coupled to the F instead of independed. (M108 S[deciRPM])
- *  Need X,Y,Z,F on every line.
+ *  Need X, Y, Z, F on every line.
  *  Needs extruder ON/OFF (M101, M103), has auto-retrection (M227 S[2560*mm] P[2560*mm])
  **/
     BFB = 3,

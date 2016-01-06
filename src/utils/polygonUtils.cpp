@@ -128,7 +128,7 @@ unsigned int PolygonUtils::moveInside(Polygons& polygons, Point& from, int dista
                         }
                         else 
                         { 
-                            Point inward_dir = crossZ(normal(ab,distance * 4) + normal(p1 - p0,distance * 4));
+                            Point inward_dir = crossZ(normal(ab, distance * 4) + normal(p1 - p0, distance * 4));
                             ret = x + normal(inward_dir, distance); // *4 to retain more precision for the eventual normalization 
                             is_inside = dot(inward_dir, p - x) >= 0;
                         } 
@@ -285,7 +285,7 @@ ClosestPolygonPoint PolygonUtils::findNearestClosest(Point from, PolygonRef poly
         Point& p1 = polygon[p1_idx];
         Point& p2 = polygon[p2_idx];
 
-        Point closestHere = LinearAlg2D::getClosestOnLineSegment(from, p1 ,p2);
+        Point closestHere = LinearAlg2D::getClosestOnLineSegment(from, p1, p2);
         int64_t dist = vSize2(from - closestHere);
         if (dist < closestDist)
         {
@@ -354,7 +354,7 @@ ClosestPolygonPoint PolygonUtils::findClosest(Point from, PolygonRef polygon)
         if (p2_idx >= polygon.size()) p2_idx = 0;
         Point& p2 = polygon[p2_idx];
 
-        Point closestHere = LinearAlg2D::getClosestOnLineSegment(from, p1 ,p2);
+        Point closestHere = LinearAlg2D::getClosestOnLineSegment(from, p1, p2);
         int64_t dist = vSize2(from - closestHere);
         if (dist < closestDist)
         {

@@ -116,9 +116,9 @@ bool MergeInfillLines::isConvertible(const Point& a, const Point& b, const Point
         return false; // infill lines are too long; otherwise infill lines might be merged when the next infill line is coincidentally shorter like |, would become \ ...
     }
 
-    // if the lines are in the same direction then abs( dot(ab,cd) / |ab| / |cd| ) == 1
-    int64_t prod = dot(ab,cd);
-    if (std::abs(prod) + 400 < ab_size * cd_size) // 400 = 20*20, where 20 micron is the allowed inaccuracy in the dot product, introduced by the inaccurate point locations of a,b,c,d
+    // if the lines are in the same direction then abs( dot(ab, cd) / |ab| / |cd| ) == 1
+    int64_t prod = dot(ab, cd);
+    if (std::abs(prod) + 400 < ab_size * cd_size) // 400 = 20*20, where 20 micron is the allowed inaccuracy in the dot product, introduced by the inaccurate point locations of a, b, c, d
         return false; // extrusion moves not in the same or opposite diraction
     
     // make lines in the same direction by flipping one

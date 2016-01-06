@@ -51,9 +51,9 @@ public:
                     // some special cases here, points on border:
                     // - p1 exactly matches p (might otherwise be missed)
                     // - p0->p1 exactly horizontal, and includes p.
-                    // (we already tested std::max(p0.X,p1.X) >= p.X )
+                    // (we already tested std::max(p0.X, p1.X) >= p.X )
                     if (p.X == p1.X ||
-                        (pdY==0 && std::min(p0.X,p1.X) <= p.X) )
+                        (pdY==0 && std::min(p0.X, p1.X) <= p.X) )
                     {
                         return 0;
                     }

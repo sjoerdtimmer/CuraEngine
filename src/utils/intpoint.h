@@ -49,7 +49,7 @@ namespace cura
 class Point3
 {
 public:
-    int32_t x,y,z;
+    int32_t x, y, z;
     Point3() {}
     Point3(const int32_t _x, const int32_t _y, const int32_t _z): x(_x), y(_y), z(_z) {}
 
@@ -110,7 +110,7 @@ public:
         double fz = INT2MM(z);
         return sqrt(fx*fx+fy*fy+fz*fz);
     }
-    /*! this function is deprecated because it can cause overflows for vectors which easily fit inside a printer. Use FPoint3.cross(a,b) instead. */
+    /*! this function is deprecated because it can cause overflows for vectors which easily fit inside a printer. Use FPoint3.cross(a, b) instead. */
     DEPRECATED(Point3 cross(const Point3& p))
     {
         return Point3(

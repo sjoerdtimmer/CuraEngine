@@ -62,10 +62,10 @@ public:
      */
     void include(Point point)
     {
-        min.X = std::min(min.X,point.X);
-        min.Y = std::min(min.Y,point.Y);
-        max.X = std::max(max.X,point.X);
-        max.Y = std::max(max.Y,point.Y);
+        min.X = std::min(min.X, point.X);
+        min.Y = std::min(min.Y, point.Y);
+        max.X = std::max(max.X, point.X);
+        max.Y = std::max(max.Y, point.Y);
     }
 };
 
