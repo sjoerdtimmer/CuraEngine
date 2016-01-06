@@ -229,7 +229,8 @@ public:
                 poly_idx++; // skip the next line piece (dont escalate the removal of edges)
                 if (poly_idx < size())
                     poly->push_back(thiss[poly_idx]);
-            } else poly->push_back(thiss[poly_idx]);
+            }
+            else poly->push_back(thiss[poly_idx]);
         }
     }
 

@@ -414,7 +414,8 @@ bool PolygonUtils::getNextPointWithDistance(Point from, int64_t dist, const Poly
                     result.location = middle;
                     result.pos = prev_idx;
                     return true;
-                } else
+                }
+                else
                 {
                     prev_poly_point = next_poly_point;
                     continue;

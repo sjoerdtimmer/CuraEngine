@@ -227,7 +227,9 @@ void TimeEstimateCalculator::planner_reverse_pass_kernel(Block *previous, Block 
         if ((!current->nominal_length_flag) && (current->max_entry_speed > next->entry_speed))
         {
             current->entry_speed = std::min(current->max_entry_speed, max_allowable_speed(-current->acceleration, next->entry_speed, current->distance));
-        } else {
+        }
+        else
+        {
             current->entry_speed = current->max_entry_speed;
         }
         current->recalculate_flag = true;

@@ -24,7 +24,8 @@ void generateInsets(SliceLayerPart* part, int nozzle_width, int line_width_0, in
             {
                 PolygonUtils::offsetSafe(part->outline, - line_width_0/2, line_width_0, part->insets[0], avoidOverlappingPerimeters_0);
             }
-        } else if (i == 1)
+        }
+        else if (i == 1)
         {
             if (line_width_0 < nozzle_width)
             {
@@ -36,7 +37,8 @@ void generateInsets(SliceLayerPart* part, int nozzle_width, int line_width_0, in
             {
                 PolygonUtils::offsetSafe(part->insets[0], -line_width_0/2 - line_width_x/2, -line_width_0/2, line_width_x, part->insets[1], &part->perimeterGaps, avoidOverlappingPerimeters);
             }
-        } else
+        }
+        else
         {
             PolygonUtils::offsetExtrusionWidth(part->insets[i-1], true, line_width_x, part->insets[i], &part->perimeterGaps, avoidOverlappingPerimeters);
         }

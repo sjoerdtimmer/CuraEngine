@@ -86,7 +86,8 @@ bool FffProcessor::processMeshGroup(MeshGroup* meshgroup)
         gcoder.writeGCode();
         log("finished Neith Gcode generation...\n");
         
-    } else 
+    }
+    else 
     {
         SliceDataStorage storage(meshgroup);
 

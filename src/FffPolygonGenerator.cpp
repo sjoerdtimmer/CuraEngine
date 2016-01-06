@@ -272,7 +272,8 @@ void FffPolygonGenerator::removeEmptyFirstLayers(SliceDataStorage& storage, int 
         if (layer_is_empty) 
         {
             n_empty_first_layers++;
-        } else
+        } 
+        else
         {
             break;
         }

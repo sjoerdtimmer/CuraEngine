@@ -61,7 +61,8 @@ void Wireframe2gcode::writeGCode()
                     if (segment.segmentType == WeaveSegmentType::MOVE || segment.segmentType == WeaveSegmentType::DOWN_AND_FLAT) // this is the case when an inset overlaps with a hole 
                     {
                         writeMoveWithRetract(segment.to); 
-                    } else 
+                    } 
+                    else 
                     {
                         gcode.writeMove(segment.to, speedBottom, extrusion_per_mm_connection); 
                     }
@@ -121,7 +122,8 @@ void Wireframe2gcode::writeGCode()
                     if (segment.segmentType == WeaveSegmentType::MOVE) 
                     {
                         writeMoveWithRetract(segment.to);
-                    } else 
+                    }
+                    else 
                     {
                         gcode.writeMove(segment.to, speedFlat, extrusion_per_mm_flat);
                         gcode.writeDelay(flat_delay);
@@ -140,11 +142,13 @@ void Wireframe2gcode::writeGCode()
                     if (segment.segmentType == WeaveSegmentType::MOVE)
                     {
                         writeMoveWithRetract(segment.to);
-                    } else if (segment.segmentType == WeaveSegmentType::DOWN_AND_FLAT)
+                    }
+                    else if (segment.segmentType == WeaveSegmentType::DOWN_AND_FLAT)
                     {
                         // do nothing
-                    } else 
-                    {   
+                    }
+                    else 
+                    {
                         gcode.writeMove(segment.to, speedFlat, extrusion_per_mm_flat);
                         gcode.writeDelay(flat_delay);
                     }
@@ -184,7 +188,8 @@ void Wireframe2gcode::go_down(WeaveLayer& layer, WeaveConnectionPart& part, unsi
     if (straight_first_when_going_down <= 0)
     {
         gcode.writeMove(segment.to, speedDown, extrusion_per_mm_connection);
-    } else 
+    }
+    else 
     {
         Point3& to = segment.to;
         Point3 from = gcode.getPosition();// segment.from;
@@ -217,7 +222,8 @@ void Wireframe2gcode::strategy_knot(WeaveLayer& layer, WeaveConnectionPart& part
     {
         WeaveConnectionSegment& next_segment = part.connection.segments[segment_idx+1];
         next_vector = next_segment.to - segment.to;
-    } else
+    }
+    else
     {
         next_vector = part.connection.segments[0].to - segment.to;
     }
@@ -268,7 +274,8 @@ void Wireframe2gcode::strategy_retract(WeaveLayer& layer, WeaveConnectionPart& p
         if (after_retract_hop)
             gcode.writeMove(to + Point3(0, 0, retract_hop_dist), speedFlat, 0);
         
-    } else 
+    }
+    else 
     {
         gcode.writeMove(to, speedUp, extrusion_per_mm_connection);
         gcode.writeRetraction(&retraction_config);
@@ -292,7 +299,8 @@ void Wireframe2gcode::strategy_compensate(WeaveLayer& layer, WeaveConnectionPart
     {
         WeaveConnectionSegment& next_segment = part.connection.segments[segment_idx+1];
         next_point = next_segment.to;
-    } else
+    }
+    else
     {
         next_point = part.connection.segments[0].to;
     }
@@ -329,10 +337,12 @@ void Wireframe2gcode::handle_segment(WeaveLayer& layer, WeaveConnectionPart& par
             if (strategy == STRATEGY_KNOT)
             {
                 strategy_knot(layer, part, segment_idx);
-            } else if (strategy == STRATEGY_RETRACT)
+            }
+            else if (strategy == STRATEGY_RETRACT)
             { 
                 strategy_retract(layer, part, segment_idx);
-            } else if (strategy == STRATEGY_COMPENSATE)
+            }
+            else if (strategy == STRATEGY_COMPENSATE)
             {
                 strategy_compensate(layer, part, segment_idx);
             }
@@ -374,7 +384,8 @@ void Wireframe2gcode::handle_roof_segment(WeaveRoofPart& inset, WeaveConnectionP
                 if (next_segment)
                 {
                     next_vector = next_segment->to - segment.to;
-                } else
+                }
+                else
                 {
                     next_vector = part.connection.segments[0].to - segment.to;
                 }

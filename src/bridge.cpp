@@ -41,7 +41,8 @@ int bridgeAngle(Polygons outline, SliceLayer* prevLayer)
             }
             area1 = area;
             idx1 = n;
-        }else if (area > area2)
+        }
+        else if (area > area2)
         {
             area2 = area;
             idx2 = n;

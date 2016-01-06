@@ -178,7 +178,8 @@ void PolygonRef::simplify(int smallest_line_segment_squared, int allowed_error_d
         int64_t error2 = LinearAlg2D::getDist2FromLineSegment(*last, here, next, &here_is_beyond_line);
         if (here_is_beyond_line == 0 && error2 < allowed_error_distance_squared)
         {// don't add the point to the result
-        } else 
+        }
+        else 
         {
             thiss[writing_idx] = here;
             writing_idx++;
@@ -206,7 +207,8 @@ void PolygonRef::simplify(int smallest_line_segment_squared, int allowed_error_d
         if (error2 < allowed_error_distance_squared)
         {
             remove(0);
-        } else 
+        }
+        else 
         {
             // leave it in
         }
