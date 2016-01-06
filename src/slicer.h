@@ -68,7 +68,9 @@ private:
         {
             //Connection points are on the same line segment.
             ret.len = vSize(ip0 - ip1);
-        }else{
+        }
+        else
+        {
             //Find out if we have should go from A to B or the other way around.
             Point p0 = polygonList[ret.polygonIdx][ret.pointIdxA];
             int64_t lenA = vSize(p0 - ip0);
@@ -94,7 +96,9 @@ private:
             {
                 ret.AtoB = true;
                 ret.len = lenA;
-            }else{
+            }
+            else
+            {
                 ret.AtoB = false;
                 ret.len = lenB;
             }

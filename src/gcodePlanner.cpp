@@ -372,7 +372,9 @@ void GCodePlanner::forceMinimalLayerTime(double minTime, double minimalSpeed, do
             this->extraTime = minTime - (extrudeTime * inv_factor) - travelTime;
         }
         this->totalPrintTime = (extrudeTime * inv_factor) + travelTime;
-    }else{
+    }
+    else
+    {
         this->totalPrintTime = totalTime;
     }
 }

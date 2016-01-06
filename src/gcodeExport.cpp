@@ -172,7 +172,9 @@ void GCodeExport::writeComment(std::string comment)
         if (comment[i] == '\n')
         {
             *output_stream << "\\n";
-        }else{
+        }
+        else
+        {
             *output_stream << comment[i];
         }
     }

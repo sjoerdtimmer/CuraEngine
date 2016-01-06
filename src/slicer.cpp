@@ -83,7 +83,9 @@ void SlicerLayer::makePolygons(Mesh* mesh, bool keep_none_closed, bool extensive
                     polygonList.add(openPolygonList[i]);
                     openPolygonList[i].clear();
                     break;
-                }else{
+                }
+                else
+                {
                     for(unsigned int n=0; n<openPolygonList[j].size(); n++)
                         openPolygonList[i].add(openPolygonList[j][n]);
 
@@ -141,7 +143,9 @@ void SlicerLayer::makePolygons(Mesh* mesh, bool keep_none_closed, bool extensive
         {
             polygonList.add(openPolygonList[bestA]);
             openPolygonList[bestA].clear();
-        }else{
+        }
+        else
+        {
             if (reversed)
             {
                 if (openPolygonList[bestA].polygonLength() > openPolygonList[bestB].polygonLength())
@@ -149,12 +153,16 @@ void SlicerLayer::makePolygons(Mesh* mesh, bool keep_none_closed, bool extensive
                     for(unsigned int n=openPolygonList[bestB].size()-1; int(n)>=0; n--)
                         openPolygonList[bestA].add(openPolygonList[bestB][n]);
                     openPolygonList[bestB].clear();
-                }else{
+                }
+                else
+                {
                     for(unsigned int n=openPolygonList[bestA].size()-1; int(n)>=0; n--)
                         openPolygonList[bestB].add(openPolygonList[bestA][n]);
                     openPolygonList[bestA].clear();
                 }
-            }else{
+            }
+            else
+            {
                 for(unsigned int n=0; n<openPolygonList[bestB].size(); n++)
                     openPolygonList[bestA].add(openPolygonList[bestB][n]);
                 openPolygonList[bestB].clear();

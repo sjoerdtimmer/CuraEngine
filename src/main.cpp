@@ -151,14 +151,20 @@ void slice(int argc, char **argv)
                         last_extruder_train = meshgroup->createExtruderTrain(0); 
                         last_settings_object = meshgroup;
                         
-                    }catch(...){
+                    }
+                    catch(...)
+                    {
                         cura::logError("Unknown exception\n");
                         exit(1);
                     }
-                }else{
+                }
+                else
+                {
                     cura::logError("Unknown option: %s\n", str);
                 }
-            }else{
+            }
+            else
+            {
                 for(str++; *str; str++)
                 {
                     switch(*str)
@@ -259,7 +265,9 @@ void slice(int argc, char **argv)
         FffProcessor::getInstance()->processMeshGroup(meshgroup);
 
 #ifndef DEBUG
-    }catch(...){
+    }
+    catch(...)
+    {
         cura::logError("Unknown exception\n");
         exit(1);
     }
