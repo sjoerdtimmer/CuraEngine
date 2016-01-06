@@ -26,6 +26,8 @@ namespace cura {
 #define VECTORS_PER_FACE 3
 
 #ifdef ARCUS
+CommandSocket* CommandSocket::instance = nullptr; // instantiate instance
+
 class CommandSocket::Private
 {
 public:
@@ -76,9 +78,24 @@ CommandSocket::CommandSocket()
 #endif
 {
 #ifdef ARCUS
-    FffProcessor::getInstance()->setCommandSocket(this);
 #endif
 }
+
+CommandSocket* CommandSocket::getInstance()
+{
+    return instance;
+}
+
+void CommandSocket::instantiate()
+{
+    instance = new CommandSocket();
+}
+
+bool CommandSocket::isInstantiated()
+{
+    return instance != nullptr;
+}
+
 
 void CommandSocket::connect(const std::string& ip, int port)
 {
@@ -257,7 +274,7 @@ void CommandSocket::sendLayerInfo(int layer_nr, int32_t z, int32_t height)
 #endif
 }
 
-void CommandSocket::sendPolygons(PolygonType type, int layer_nr, Polygons& polygons, int line_width)
+void CommandSocket::sendPolygons(PrintFeatureType type, int layer_nr, Polygons& polygons, int line_width)
 {
 #ifdef ARCUS
     if(!private_data->current_sliced_object)

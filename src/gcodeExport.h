@@ -47,12 +47,12 @@ private:
     int layer_thickness; //!< layer height
     double extrusion_mm3_per_mm;//!< mm^3 filament moved per mm line extruded
 public:
-    const char* name; //!< name of the feature type
+    PrintFeatureType type; //!< name of the feature type
     bool spiralize;
     RetractionConfig *const retraction_config;
     
     // GCodePathConfig() : speed(0), line_width(0), extrusion_mm3_per_mm(0.0), name(nullptr), spiralize(false), retraction_config(nullptr) {}
-    GCodePathConfig(RetractionConfig* retraction_config, const char* name) : speed_base(0), speed_current(0), line_width(0), extrusion_mm3_per_mm(0.0), name(name), spiralize(false), retraction_config(retraction_config) {}
+    GCodePathConfig(RetractionConfig* retraction_config, PrintFeatureType type) : speed_base(0), speed_current(0), line_width(0), extrusion_mm3_per_mm(0.0), type(type), spiralize(false), retraction_config(retraction_config) {}
     
     /*!
      * Initialize some of the member variables.
@@ -114,6 +114,11 @@ public:
     bool isTravelPath()
     {
         return line_width == 0;
+    }
+    
+    double getFlowPercentage()
+    {
+        return flow;
     }
     
 private:
@@ -187,8 +192,7 @@ private:
     
     bool is_volumatric;
     bool firmware_retract; //!< whether retractions are done in the firmware, or hardcoded in E values.
-    
-    CommandSocket* commandSocket; //!< for sending travel data
+
     unsigned int layer_nr; //!< for sending travel data
     
 public:
@@ -196,7 +200,7 @@ public:
     GCodeExport();
     ~GCodeExport();
     
-    void setCommandSocketAndLayerNr(CommandSocket* commandSocket, unsigned int layer_nr);
+    void setLayerNr(unsigned int layer_nr);
     
     void setOutputStream(std::ostream* stream);
     
@@ -234,6 +238,7 @@ public:
     
     void writeComment(std::string comment);
     void writeTypeComment(const char* type);
+    void writeTypeComment(PrintFeatureType type);
     void writeLayerComment(int layer_nr);
     void writeLayerCountComment(int layer_count);
     

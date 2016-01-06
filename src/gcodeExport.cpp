@@ -5,13 +5,13 @@
 
 #include "gcodeExport.h"
 #include "utils/logoutput.h"
+#include "PrintFeature.h"
 
 namespace cura {
 
 GCodeExport::GCodeExport()
 : output_stream(&std::cout)
 , currentPosition(0,0,MM2INT(20))
-, commandSocket(nullptr)
 , layer_nr(0)
 {
     current_e_value = 0;
@@ -29,8 +29,7 @@ GCodeExport::~GCodeExport()
 {
 }
 
-void GCodeExport::setCommandSocketAndLayerNr(CommandSocket* commandSocket_, unsigned int layer_nr_) {
-    commandSocket = commandSocket_;
+void GCodeExport::setLayerNr(unsigned int layer_nr_) {
     layer_nr = layer_nr_;
 }
 
@@ -184,6 +183,41 @@ void GCodeExport::writeTypeComment(const char* type)
 {
     *output_stream << ";TYPE:" << type << "\n";
 }
+
+void GCodeExport::writeTypeComment(PrintFeatureType type)
+{
+    switch (type)
+    {
+        case PrintFeatureType::OuterWall:
+            *output_stream << ";TYPE:WALL-OUTER\n";
+            break;
+        case PrintFeatureType::InnerWall:
+            *output_stream << ";TYPE:WALL-INNER\n";
+            break;
+        case PrintFeatureType::Skin:
+            *output_stream << ";TYPE:SKIN\n";
+            break;
+        case PrintFeatureType::Support:
+            *output_stream << ";TYPE:SUPPORT\n";
+            break;
+        case PrintFeatureType::Skirt:
+            *output_stream << ";TYPE:SKIRT\n";
+            break;
+        case PrintFeatureType::Infill:
+            *output_stream << ";TYPE:FILL\n";
+            break;
+        case PrintFeatureType::SupportInfill:
+            *output_stream << ";TYPE:SUPPORT\n";
+            break;
+        case PrintFeatureType::MoveCombing:
+        case PrintFeatureType::MoveRetraction:
+        default:
+            // do nothing
+            break;
+    }
+}
+
+
 void GCodeExport::writeLayerComment(int layer_nr)
 {
     *output_stream << ";LAYER:" << layer_nr << "\n";
@@ -366,16 +400,16 @@ void GCodeExport::writeMove(int x, int y, int z, double speed, double extrusion_
     else
     {
         *output_stream << "G0";
-                
-        if (commandSocket) 
+
+        if (CommandSocket::isInstantiated()) 
         {
             // we should send this travel as a non-retraction move
             cura::Polygons travelPoly;
             PolygonRef travel = travelPoly.newPoly();
             travel.add(Point(currentPosition.x, currentPosition.y));
             travel.add(Point(x, y));
-            commandSocket->sendPolygons(extruder_attr[current_extruder].retraction_e_amount_current ? MoveRetractionType : MoveCombingType, layer_nr, travelPoly, extruder_attr[current_extruder].retraction_e_amount_current ? MM2INT(0.2) : MM2INT(0.1));
-        }                    
+            CommandSocket::getInstance()->sendPolygons(extruder_attr[current_extruder].retraction_e_amount_current ? PrintFeatureType::MoveRetraction : PrintFeatureType::MoveCombing, layer_nr, travelPoly, extruder_attr[current_extruder].retraction_e_amount_current ? MM2INT(0.2) : MM2INT(0.1));
+        }
     }
 
     if (currentSpeed != speed)
