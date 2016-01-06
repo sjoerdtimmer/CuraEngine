@@ -397,7 +397,7 @@ cura::proto::Layer* CommandSocket::Private::getLayerById(int id)
 {
     id += current_layer_offset;
 
-    auto itr = std::find_if (current_sliced_object->mutable_layers()->begin(), current_sliced_object->mutable_layers()->end(), [id](cura::proto::Layer& l) { return l.id() == id; });
+    auto itr = std::find_if(current_sliced_object->mutable_layers()->begin(), current_sliced_object->mutable_layers()->end(), [id](cura::proto::Layer& l) { return l.id() == id; });
 
     cura::proto::Layer* layer = nullptr;
     if (itr != current_sliced_object->mutable_layers()->end())

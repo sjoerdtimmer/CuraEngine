@@ -49,7 +49,7 @@ SettingConfig* SettingContainer::addChild(std::string key, std::string label)
 
 SettingConfig& SettingContainer::getOrCreateChild(std::string key, std::string label)
 {
-    auto child_it = std::find_if (children.begin(), children.end(), [&key](SettingConfig& child) { return child.key == key; } );
+    auto child_it = std::find_if(children.begin(), children.end(), [&key](SettingConfig& child) { return child.key == key; } );
     if (child_it == children.end())
     {
         children.emplace_back(key, label, this);
@@ -102,7 +102,7 @@ SettingContainer* SettingRegistry::getCategory(std::string key)
 
 SettingContainer& SettingRegistry::getOrCreateCategory(std::string cat_name, const rapidjson::Value& category)
 {
-    std::list<SettingContainer>::iterator category_found = std::find_if (categories.begin(), categories.end(), [&cat_name](SettingContainer& cat) { return cat.getKey().compare(cat_name) == 0; });
+    std::list<SettingContainer>::iterator category_found = std::find_if(categories.begin(), categories.end(), [&cat_name](SettingContainer& cat) { return cat.getKey().compare(cat_name) == 0; });
     if (category_found != categories.end())
     { // category is already present; add settings to category
         return *category_found;
