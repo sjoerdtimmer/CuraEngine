@@ -158,9 +158,40 @@ void generateInfill(int layerNr, SliceMeshStorage& storage, int innermost_wall_e
         }
         infill.removeSmallAreas(MIN_AREA_SIZE);
         
-        part.infill_area.push_back(infill.offset(infill_skin_overlap));
+        Polygons infill_overlapped_with_skin = infill.offset(infill_skin_overlap);
+        part.infill_areas_per_line_distance.emplace_back(infill_overlapped_with_skin, &storage);
     }
 }
+
+void generateModifiedInfill(int layerNr, SliceDataStorage& storage, SliceMeshStorage& mesh_storage)
+{
+    SliceLayer& layer = mesh_storage.layers[layerNr];
+
+    for (SliceLayerPart& part : layer.parts)
+    {
+        Polygons& basic_infill = part.infill_areas_per_line_distance[0].infill_area_per_layer_height[0];
+        for (ModifierMeshStorage& modifier_mesh : storage.modifier_meshes)
+        {
+            if ((unsigned int)layerNr >= modifier_mesh.modifier_layers.size())
+            {
+                continue;
+            }
+            ModifierLayer& modifier_layer = modifier_mesh.modifier_layers[layerNr];
+            if (part.boundaryBox.hit(modifier_layer.boundaryBox))
+            {
+                Polygons intersection = basic_infill.intersection(modifier_layer.areas);
+                if (intersection.size() == 0)
+                {
+                    continue;
+                }
+                basic_infill = basic_infill.difference(intersection.offset(5)); // offset 5 for easier cut-off
+                part.infill_areas_per_line_distance.emplace_back(intersection, &modifier_mesh);
+            }
+        }
+    }
+    
+}
+
 
 void combineInfillLayers(SliceMeshStorage& storage,unsigned int amount)
 {
@@ -190,23 +221,33 @@ void combineInfillLayers(SliceMeshStorage& storage,unsigned int amount)
             {
                 break;
             }
-
             SliceLayer* layer2 = &storage.layers[layer_idx - n];
-            for(SliceLayerPart& part : layer->parts)
-            {
-                Polygons result;
-                for(SliceLayerPart& part2 : layer2->parts)
-                {
-                    if(part.boundaryBox.hit(part2.boundaryBox))
-                    {
-                        Polygons intersection = part.infill_area[n - 1].intersection(part2.infill_area[0]).offset(-200).offset(200);
-                        result.add(intersection);
-                        part.infill_area[n - 1] = part.infill_area[n - 1].difference(intersection);
-                        part2.infill_area[0] = part2.infill_area[0].difference(intersection);
-                    }
-                }
 
-                part.infill_area.push_back(result);
+            for(SliceLayerPart& part1 : layer->parts)
+            {
+                for (SliceInfillArea& infill_areas_same_line_distance1 : part1.infill_areas_per_line_distance)
+                {
+                    std::vector<Polygons>& infill_area1 = infill_areas_same_line_distance1.infill_area_per_layer_height;
+                    Polygons result;
+                    for (SliceLayerPart& part2 : layer2->parts)
+                    {
+                        if (part1.boundaryBox.hit(part2.boundaryBox))
+                        {
+                            SliceInfillArea* infill_areas_same_line_distance2 = part2.getModifiedInfillArea(infill_areas_same_line_distance1.modifier_id);
+                            if (!infill_areas_same_line_distance2)
+                            {
+                                continue;
+                            }
+                            std::vector<Polygons>& infill_area2 = infill_areas_same_line_distance2->infill_area_per_layer_height;
+                            Polygons intersection = infill_area1[n - 1].intersection(infill_area2[0]).offset(-200).offset(200);
+                            result.add(intersection);
+                            infill_area1[n - 1] = infill_area1[n - 1].difference(intersection);
+                            infill_area2[0] = infill_area2[0].difference(intersection);
+                        }
+                    }
+
+                    infill_area1.push_back(result);
+                }
             }
         }
     }

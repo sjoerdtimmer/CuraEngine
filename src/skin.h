@@ -73,6 +73,9 @@ void generateSkinInsets(SliceLayerPart* part, int extrusionWidth, int insetCount
  */
 void generateInfill(int layerNr, SliceMeshStorage& storage, int innermost_wall_extrusion_width, int infill_skin_overlap, int wall_line_count);
 
+// TODO: doc
+void generateModifiedInfill(int layerNr, SliceDataStorage& storage, SliceMeshStorage& mesh_storage);
+
 /*!
  * \brief Combines the infill of multiple layers for a specified mesh.
  * 

@@ -75,7 +75,21 @@ bool FffPolygonGenerator::sliceModel(MeshGroup* meshgroup, TimeKeeper& timeKeepe
     {
         Mesh& mesh = meshgroup->meshes[mesh_idx];
         Slicer* slicer = new Slicer(&mesh, initial_slice_z, layer_thickness, layer_count, mesh.getSettingBoolean("meshfix_keep_open_polygons"), mesh.getSettingBoolean("meshfix_extensive_stitching"));
-        slicerList.push_back(slicer);
+        if (mesh.getSettingBoolean("modifier_mesh"))
+        {
+            // save modifier meshes into SliceDataStorage
+            storage.modifier_meshes.emplace_back(&mesh);
+            ModifierMeshStorage& modifier_storage = storage.modifier_meshes.back();
+            for (SlicerLayer& layer : slicer->layers)
+            {
+                modifier_storage.modifier_layers.emplace_back(layer.polygonList);
+            }
+            delete slicer;
+        }
+        else 
+        {
+            slicerList.push_back(slicer);
+        }
         /*
         for(SlicerLayer& layer : slicer->layers)
         {
@@ -87,6 +101,7 @@ bool FffPolygonGenerator::sliceModel(MeshGroup* meshgroup, TimeKeeper& timeKeepe
         Progress::messageProgress(Progress::Stage::SLICING, mesh_idx + 1, meshgroup->meshes.size());
     }
     
+
     log("Layer count: %i\n", layer_count);
 
     meshgroup->clear();///Clear the mesh face and vertex data, it is no longer needed after this point, and it saves a lot of memory.
@@ -316,6 +331,7 @@ void FffPolygonGenerator::processSkinsAndInfill(SliceDataStorage& storage, unsig
                 infill_skin_overlap = skin_extrusion_width / 2;
             }
             generateInfill(layer_nr, mesh, innermost_wall_extrusion_width, infill_skin_overlap, wall_line_count);
+            generateModifiedInfill(layer_nr, storage, mesh);
             if (mesh.getSettingAsFillPerimeterGapMode("fill_perimeter_gaps") == FillPerimeterGapMode::SKIN)
             {
                 generatePerimeterGaps(layer_nr, mesh, skin_extrusion_width, mesh.getSettingAsCount("bottom_layers"), mesh.getSettingAsCount("top_layers"));

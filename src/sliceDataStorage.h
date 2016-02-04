@@ -24,6 +24,20 @@ public:
     std::vector<Polygons> insets;   //!< The skin can have perimeters so that the skin lines always start at a perimeter instead of in the middle of an infill cell.
     Polygons perimeterGaps;         //!< The gaps introduced by avoidOverlappingPerimeters which would otherwise be overlapping perimeters.
 };
+
+class SliceInfillArea : public SettingsMessenger
+{
+public:
+    int modifier_id;
+    std::vector<Polygons> infill_area_per_layer_height; //!< The infill_area are the areas which need to be filled with sparse (0-99%) infill. The infill_area is an array to support thicker layers of sparse infill. infill_area[n] is infill_area of (n+1) layers thick. 
+    SliceInfillArea(Polygons& area, SettingsBaseVirtual* settings, int modifier_id = -1)
+    : SettingsMessenger(settings)
+    , modifier_id(modifier_id)
+    {
+        infill_area_per_layer_height.push_back(area); // non-combined area
+    }
+};
+
 /*!
     The SliceLayerPart is a single enclosed printable area for a single layer. (Also known as islands)
     It's filled during the FffProcessor.processSliceData(.), where each step uses data from the previous steps.
@@ -36,8 +50,23 @@ public:
     PolygonsPart outline;       //!< The outline is the first member that is filled, and it's filled with polygons that match a cross section of the 3D model. The first polygon is the outer boundary polygon and the rest are holes.
     std::vector<Polygons> insets;         //!< The insets are generated with: an offset of (index * line_width + line_width/2) compared to the outline. The insets are also known as perimeters, and printed inside out.
     std::vector<SkinPart> skin_parts;     //!< The skin parts which are filled for 100% with lines and/or insets.
-    std::vector<Polygons> infill_area; //!< The infill_area are the areas which need to be filled with sparse (0-99%) infill. The infill_area is an array to support thicker layers of sparse infill. infill_area[n] is infill_area of (n+1) layers thick. 
+    std::vector<SliceInfillArea> infill_areas_per_line_distance; //!< A vector of infill areas with different density.
     Polygons perimeterGaps; //!< The gaps introduced by avoidOverlappingPerimeters which would otherwise be overlapping perimeters.
+    
+    SliceLayerPart()
+    {
+    }
+    SliceInfillArea* getModifiedInfillArea(int modifier_id)
+    {
+        for (SliceInfillArea& infill_area : infill_areas_per_line_distance)
+        {
+            if (infill_area.modifier_id == modifier_id)
+            {
+                return &infill_area;
+            }
+        }
+        return nullptr;
+    }
 };
 
 /*!
@@ -104,7 +133,31 @@ public:
     ~SupportStorage(){ supportLayers.clear(); }
 };
 /******************/
+class ModifierLayer
+{
+public:
+    Polygons areas;
+    AABB boundaryBox;
+    ModifierLayer(Polygons& areas)
+    : areas(areas)
+    , boundaryBox(areas)
+    {
+    }
+};
 
+
+class ModifierMeshStorage : public SettingsMessenger // passes on settings from a Mesh object
+{
+public:
+    std::vector<ModifierLayer> modifier_layers; // areas to be modified for each layer
+    
+    ModifierMeshStorage(SettingsBaseVirtual* settings)
+    : SettingsMessenger(settings)
+    {
+    }
+};
+
+/******************/
 class SliceMeshStorage : public SettingsMessenger // passes on settings from a Mesh object
 {
 public:
@@ -134,6 +187,8 @@ public:
     
     Point3 model_size, model_min, model_max;
     std::vector<SliceMeshStorage> meshes;
+    
+    std::vector<ModifierMeshStorage> modifier_meshes;
     
     std::vector<RetractionConfig> retraction_config_per_extruder; //!< used for support, skirt, etc.
     RetractionConfig retraction_config; //!< The retraction config used as fallback when getting the per_extruder_config or the mesh config was impossible (for travelConfig)
