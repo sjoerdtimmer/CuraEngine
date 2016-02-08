@@ -71,6 +71,7 @@ bool FffPolygonGenerator::sliceModel(MeshGroup* meshgroup, TimeKeeper& timeKeepe
     }
 
     std::vector<Slicer*> slicerList;
+    int modifier_mesh_id = 1;
     for(unsigned int mesh_idx = 0; mesh_idx < meshgroup->meshes.size(); mesh_idx++)
     {
         Mesh& mesh = meshgroup->meshes[mesh_idx];
@@ -78,18 +79,21 @@ bool FffPolygonGenerator::sliceModel(MeshGroup* meshgroup, TimeKeeper& timeKeepe
         if (mesh.getSettingBoolean("modifier_mesh"))
         {
             // save modifier meshes into SliceDataStorage
-            storage.modifier_meshes.emplace_back(&mesh);
+            storage.modifier_meshes.emplace_back(&mesh, modifier_mesh_id);
             ModifierMeshStorage& modifier_storage = storage.modifier_meshes.back();
             for (SlicerLayer& layer : slicer->layers)
             {
                 modifier_storage.modifier_layers.emplace_back(layer.polygonList);
             }
             delete slicer;
+            modifier_mesh_id++;
         }
         else 
         {
             slicerList.push_back(slicer);
         }
+        
+        meshgroup->setModifierMeshCount(modifier_mesh_id - 1);
         /*
         for(SlicerLayer& layer : slicer->layers)
         {

@@ -169,7 +169,9 @@ void FffGcodeWriter::initConfigs(SliceDataStorage& storage)
     
         for(unsigned int idx=0; idx<MAX_INFILL_COMBINE; idx++)
         {
-            mesh.infill_config[idx].init(mesh.getSettingInMillimetersPerSecond("speed_infill"), mesh.getSettingInMicrons("infill_line_width") * (idx + 1), mesh.getSettingInPercentage("material_flow"));
+            InfillConfigPerModifier& conf_per_mod
+            for (unsigned int modifier_id = 0; modifier_id < storage.getM
+            mesh.infill_config_per_modifier_per_layerheight[idx].init(mesh.getSettingInMillimetersPerSecond("speed_infill"), mesh.getSettingInMicrons("infill_line_width") * (idx + 1), mesh.getSettingInPercentage("material_flow"));
         }
     }
     
@@ -580,7 +582,7 @@ void FffGcodeWriter::addMeshLayerToGCode(SliceDataStorage& storage, SliceMeshSto
         {
             infill_angle += 90;
         }
-        int infill_line_width =  mesh->infill_config[0].getLineWidth();
+        int infill_line_width =  mesh->infill_config_per_modifier_per_layerheight[0].getLineWidth();
         
         int infill_line_distance = mesh->getSettingInMicrons("infill_line_distance");
         int infill_overlap = mesh->getSettingInMicrons("infill_overlap");
@@ -639,8 +641,8 @@ void FffGcodeWriter::processMultiLayerInfill(GCodePlanner& gcode_layer, SliceMes
                 Polygons infill_polygons;
                 Polygons infill_lines;
                 infill_comp.generate(infill_polygons, infill_lines, nullptr);
-                gcode_layer.addPolygonsByOptimizer(infill_polygons, &mesh->infill_config[n]);
-                gcode_layer.addLinesByOptimizer(infill_lines, &mesh->infill_config[n], (infill_pattern == EFillMethod::ZIG_ZAG)? SpaceFillType::PolyLines : SpaceFillType::Lines);
+                gcode_layer.addPolygonsByOptimizer(infill_polygons, &mesh->infill_config_per_modifier_per_layerheight[n][infill_area.modifier_id]);
+                gcode_layer.addLinesByOptimizer(infill_lines, &mesh->infill_config_per_modifier_per_layerheight[n][infill_area.modifier_id], (infill_pattern == EFillMethod::ZIG_ZAG)? SpaceFillType::PolyLines : SpaceFillType::Lines);
             }
         }
     }
@@ -665,14 +667,14 @@ void FffGcodeWriter::processSingleLayerInfill(GCodePlanner& gcode_layer, SliceMe
         EFillMethod pattern = infill_area_same_line_dist.getSettingAsFillMethod("infill_pattern");
         Infill infill_comp(pattern, infill_area_same_line_dist.infill_area_per_layer_height[0], 0, false, line_width, infill_line_distance, infill_overlap, infill_angle, false, false);
         infill_comp.generate(infill_polygons, infill_lines, nullptr);
-        gcode_layer.addPolygonsByOptimizer(infill_polygons, &mesh->infill_config[0]);
+        gcode_layer.addPolygonsByOptimizer(infill_polygons, &mesh->infill_config_per_modifier_per_layerheight[0][infill_area_same_line_dist.modifier_id]);
         if (pattern == EFillMethod::GRID || pattern == EFillMethod::LINES || pattern == EFillMethod::TRIANGLES)
         {
-            gcode_layer.addLinesByOptimizer(infill_lines, &mesh->infill_config[0], SpaceFillType::Lines, mesh->getSettingInMicrons("infill_wipe_dist")); 
+            gcode_layer.addLinesByOptimizer(infill_lines, &mesh->infill_config_per_modifier_per_layerheight[0][infill_area_same_line_dist.modifier_id], SpaceFillType::Lines, mesh->getSettingInMicrons("infill_wipe_dist")); 
         }
         else 
         {
-            gcode_layer.addLinesByOptimizer(infill_lines, &mesh->infill_config[0], (pattern == EFillMethod::ZIG_ZAG)? SpaceFillType::PolyLines : SpaceFillType::Lines); 
+            gcode_layer.addLinesByOptimizer(infill_lines, &mesh->infill_config_per_modifier_per_layerheight[0][infill_area_same_line_dist.modifier_id], (pattern == EFillMethod::ZIG_ZAG)? SpaceFillType::PolyLines : SpaceFillType::Lines); 
         }
     }
 }

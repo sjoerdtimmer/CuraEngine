@@ -185,7 +185,7 @@ void generateModifiedInfill(int layerNr, SliceDataStorage& storage, SliceMeshSto
                     continue;
                 }
                 basic_infill = basic_infill.difference(intersection.offset(5)); // offset 5 for easier cut-off
-                part.infill_areas_per_line_distance.emplace_back(intersection, &modifier_mesh);
+                part.infill_areas_per_line_distance.emplace_back(intersection, &modifier_mesh, modifier_mesh.modifier_id);
             }
         }
     }

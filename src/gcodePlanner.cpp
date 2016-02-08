@@ -642,9 +642,12 @@ void GCodePlanner::completeConfigs()
 
         mesh.insetX_config.setLayerHeight(layer_thickness);
         mesh.skin_config.setLayerHeight(layer_thickness);
-        for(unsigned int idx=0; idx<MAX_INFILL_COMBINE; idx++)
+        for (InfillConfigPerModifier& conf_per_mod : mesh.infill_config_per_modifier_per_layerheight)
         {
-            mesh.infill_config[idx].setLayerHeight(layer_thickness);
+            for (GCodePathConfig& conf : conf_per_mod)
+            {
+                conf.setLayerHeight(layer_thickness);
+            }
         }
     }
     
@@ -668,9 +671,12 @@ void GCodePlanner::processInitialLayersSpeedup()
             mesh.inset0_config.smoothSpeed(initial_layer_speed, layer_nr, initial_speedup_layers);
             mesh.insetX_config.smoothSpeed(initial_layer_speed, layer_nr, initial_speedup_layers);
             mesh.skin_config.smoothSpeed(initial_layer_speed, layer_nr, initial_speedup_layers);
-            for(unsigned int idx=0; idx<MAX_INFILL_COMBINE; idx++)
+            for (InfillConfigPerModifier& conf_per_mod : mesh.infill_config_per_modifier_per_layerheight)
             {
-                mesh.infill_config[idx].smoothSpeed(initial_layer_speed, layer_nr, initial_speedup_layers);
+                for (GCodePathConfig& conf : conf_per_mod)
+                {
+                    conf.smoothSpeed(initial_layer_speed, layer_nr, initial_speedup_layers);
+                }
             }
         }
     }

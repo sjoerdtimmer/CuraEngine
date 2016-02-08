@@ -19,6 +19,7 @@ class MeshGroup : public SettingsBase, NoCopy
 {
     ExtruderTrain* extruders[MAX_EXTRUDERS] = {nullptr};
     int extruder_count;
+    int modifier_mesh_count;
 public:
     int getExtruderCount()
     {
@@ -28,10 +29,19 @@ public:
         }
         return extruder_count;
     }
+    void setModifierMeshCount(int count)
+    {
+        modifier_mesh_count = count;
+    }
+    int getModifierMeshCount()
+    {
+        return modifier_mesh_count;
+    }
 
     MeshGroup(SettingsBaseVirtual* settings_base)
     : SettingsBase(settings_base)
     , extruder_count(-1)
+    , modifier_mesh_count(-1)
     {}
     
     ~MeshGroup() 

@@ -149,15 +149,20 @@ public:
 class ModifierMeshStorage : public SettingsMessenger // passes on settings from a Mesh object
 {
 public:
+    int modifier_id;
     std::vector<ModifierLayer> modifier_layers; // areas to be modified for each layer
     
-    ModifierMeshStorage(SettingsBaseVirtual* settings)
+    ModifierMeshStorage(SettingsBaseVirtual* settings, int modifier_id)
     : SettingsMessenger(settings)
+    , modifier_id(modifier_id)
     {
     }
 };
 
 /******************/
+
+typedef std::vector<GCodePathConfig> InfillConfigPerModifier;
+
 class SliceMeshStorage : public SettingsMessenger // passes on settings from a Mesh object
 {
 public:
@@ -169,14 +174,24 @@ public:
     GCodePathConfig inset0_config;
     GCodePathConfig insetX_config;
     GCodePathConfig skin_config;
-    std::vector<GCodePathConfig> infill_config;
     
-    SliceMeshStorage(SettingsBaseVirtual* settings)
+    std::vector<InfillConfigPerModifier> infill_config_per_modifier_per_layerheight;
+    
+    SliceMeshStorage(SettingsBaseVirtual* settings, int modifier_mesh_count)
     : SettingsMessenger(settings), layer_nr_max_filled_layer(0), inset0_config(&retraction_config, PrintFeatureType::OuterWall), insetX_config(&retraction_config, PrintFeatureType::InnerWall), skin_config(&retraction_config, PrintFeatureType::Skin)
     {
-        infill_config.reserve(MAX_INFILL_COMBINE);
-        for(int n=0; n<MAX_INFILL_COMBINE; n++)
-            infill_config.emplace_back(&retraction_config, PrintFeatureType::Infill);
+        infill_config_per_modifier_per_layerheight.reserve(MAX_INFILL_COMBINE);
+        for (int combine_idx = 0; combine_idx < MAX_INFILL_COMBINE; combine_idx++)
+        {
+            infill_config_per_modifier_per_layerheight.emplace_back();
+            InfillConfigPerModifier& infill_config_per_modifier = infill_config_per_modifier_per_layerheight.back();
+            infill_config_per_modifier_per_layerheight.reserve(modifier_mesh_count + 1);
+            for (int modifier_id = 0; modifier_id < modifier_mesh_count + 1; modifier_id++)
+            {
+                infill_config_per_modifier.emplace_back(&retraction_config, PrintFeatureType::Infill);
+            }
+            
+        }
     }
 };
 
