@@ -15,6 +15,14 @@ namespace cura
  * Container for items with location for which the lookup for nearby items is optimized.
  * 
  * It functions by hashing the items location and lookuping up based on the hash of that location and the hashes of nearby locations.
+ * 
+ * Instead of mapping a cell location multiple times to an object within the cell, 
+ * each cell location is mapped only once to a vector of objects within the cell.
+ * 
+ * The first alternative has the overhead of 'bucket-collisions' where all mappings of two different cells get placed in the same bucket, 
+ * which causes findNearby to loop over unneeded elements.
+ * The current implementation has the overhead and indirection of creating vectors and all that comes with it."
+
  */
 template<typename T>
 class BucketGrid2D
