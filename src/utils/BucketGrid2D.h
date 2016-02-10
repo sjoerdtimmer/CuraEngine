@@ -2,9 +2,11 @@
 #ifndef UTILS_BUCKET_GRID_2D_H
 #define UTILS_BUCKET_GRID_2D_H
 
+#include <unordered_map>
+#include <vector>
+
 #include "logoutput.h"
 #include "intpoint.h"
-#include <unordered_map>
 
 namespace cura
 {
@@ -19,6 +21,8 @@ class BucketGrid2D
 {
 private:
 
+    typedef Point CellIdx;
+    
     /*!
      * Returns a point for which the hash is at a grid position of \p relativeHash relative to \p p.
      * 
@@ -35,54 +39,44 @@ private:
     /*!
      * A hash class representing the hash function object.
      */
-    struct PointHasher
+    struct CellIdxHasher
     {
-
-        /*!
-         * The basic hash function for a 2D grid position.
-         * \param p The grid location to hash
-         * \return the hash
-         */
-        inline uint32_t pointHash_simple(const Point& p) const
-        {
-            return p.X ^ (p.Y << 8);
-        }
-
+        
         /*!
          * The hash function for a 2D position.
          * \param point The location to hash
          * \return the hash
          */
-        inline uint32_t pointHash(const Point& point) const
+        inline uint32_t pointHash(const CellIdx& point) const
         {
-            Point p = point/squareSize;
-            return pointHash_simple(p);
+            return point.X ^ (point.Y << 8);
         }
-/*
-        inline uint32_t pointHash(const Point& point, const Point& relativeHash) const
-        {
-            Point p = p/squareSize + relativeHash;
-            return pointHash_simple(p);
-        }*/
-
-        /*!
-         * The horizontal and vertical size of a cell in the grid; the width and height of a bucket.
-         */
-        int squareSize;
-        
-        /*!
-         * Basic constructor.
-         * \param squareSize The horizontal and vertical size of a cell in the grid; the width and height of a bucket.
-         */
-        PointHasher(int squareSize) : squareSize(squareSize) {};
         
         /*!
          * See PointHasher::pointHash
          */
-        uint32_t operator()(const Point& p) const { return pointHash(p); };
+        uint32_t operator()(const CellIdx& p) const { return pointHash(p); };
 
     };
-
+    
+    
+    struct Elem 
+    {
+        Point pos;
+        T object;
+        Elem(Point pos, T object)
+        : pos(pos)
+        , object(object)
+        {
+        }
+    };
+    
+    typedef std::vector<Elem> Neighborhood;
+    /*!
+     * The map type used to associate points with their objects.
+     */
+    typedef typename std::unordered_map<CellIdx, Neighborhood, CellIdxHasher> Map;
+    
     /*!
      * A helper predicate object which allways returns false when comparing two objects.
      * 
@@ -93,33 +87,50 @@ private:
         template<typename S>
         bool operator()(const S& p1, const S& p2) const { return false; };
     };
-
-
 private:
-    /*!
-     * Basic constructor.
-     * \param squareSize The horizontal and vertical size of a cell in the grid; the width and height of a bucket.
-     */
-    int squareSize;
-    /*!
-     * The map type used to associate points with their objects.
-     */
-    typedef typename std::unordered_map<Point, T, PointHasher, NeverEqual> Map;
-    
+    int squareSize; //!< The horizontal and vertical size of a cell in the grid; the width and height of a bucket.
     /*!
      * The map used to associate points with their objects.
      */
-    Map point2object;
+    Map point2neighborhood;
 
-
+    /*!
+     * TODO
+     */
+    CellIdx getCellIdx(const Point& point) const
+    {
+        return point / squareSize;
+    }
 public:
     /*!
      * The constructor for a bucket grid.
      * 
      * \param squareSize The horizontal and vertical size of a cell in the grid; the width and height of a bucket.
-     * \param initial_map_size The minimal number of initial buckets 
+     * \param initial_map_size The number of elements to be inserted 
      */
-    BucketGrid2D(int squareSize, unsigned int initial_map_size = 4) : squareSize(squareSize), point2object(initial_map_size, PointHasher(squareSize)) {};
+    BucketGrid2D(int squareSize, unsigned int initial_map_size = 4)
+    : squareSize(squareSize)
+    , point2neighborhood(initial_map_size, CellIdxHasher())
+    {
+        point2neighborhood.reserve(initial_map_size);
+    }
+    /*!
+     * Insert a new point into the bucket grid.
+     * 
+     * \param p The location associated with \p t.
+     * \param t The object to insert in the grid cell for position \p p.
+     */
+    void insert(Point& p, T& t)
+    {
+        typedef typename Map::iterator iter;
+        Neighborhood new_neighborhood;
+        new_neighborhood.emplace_back(p, t);
+        std::pair<iter, bool> emplaced = point2neighborhood.emplace(getCellIdx(p), new_neighborhood); // try to create a new Neighborhood
+        if (!emplaced.second)
+        {
+            emplaced.first->second.emplace_back(p, t); // insert it in the Neighborhood  
+        }
+    };
 
     /*!
      * Find all objects with a point in a grid cell at a distance of one cell from the cell of \p p.
@@ -135,10 +146,15 @@ public:
         {
             for (int y = -1; y <= 1; y++)
             {
-                int bucket_idx = point2object.bucket(getRelativeForHash(p, Point(x,y))); // when the hash is not a hash of a present item, the bucket_idx returned may be one already encountered
-                for ( auto local_it = point2object.begin(bucket_idx); local_it!= point2object.end(bucket_idx); ++local_it )
+                typename Map::const_iterator found = point2neighborhood.find(getCellIdx(p) + CellIdx(x,y));
+                if (found == point2neighborhood.end())
                 {
-                    ret.push_back(local_it->second);
+                    continue;
+                }
+                Neighborhood points_in_cell = found->second;
+                for (Elem& elem : points_in_cell)
+                {
+                    ret.push_back(elem.object);
                 }
             }
         }
@@ -174,14 +190,19 @@ public:
         {
             for (int y = -1; y <= 1; y++)
             {
-                int bucket_idx = point2object.bucket(getRelativeForHash(p, Point(x,y)));
-                for ( auto local_it = point2object.begin(bucket_idx); local_it!= point2object.end(bucket_idx); ++local_it )
+                typename Map::const_iterator found = point2neighborhood.find(getCellIdx(p) + CellIdx(x,y));
+                if (found == point2neighborhood.end())
                 {
-                    int32_t dist2 = vSize2(local_it->first - p);
+                    continue;
+                }
+                Neighborhood points_in_cell = found.second;
+                for (Elem& elem : points_in_cell)
+                {
+                    int32_t dist2 = vSize2(elem.p - p);
                     if (dist2 < bestDist2)
                     {
                         found = true;
-                        nearby = local_it->second;
+                        nearby = elem.t;
                         bestDist2 = dist2;
                     }
                 }
@@ -190,21 +211,6 @@ public:
         return found;
     };
 
-    
-    /*!
-     * Insert a new point into the bucket grid.
-     * 
-     * \param p The location associated with \p t.
-     * \param t The object to insert in the grid cell for position \p p.
-     */
-    void insert(Point& p, T& t)
-    {
-//         typedef typename Map::iterator iter;
-//         std::pair<iter, bool> emplaced = 
-        point2object.emplace(p, t);
-//         if (! emplaced.second)
-//             logError("Error! BucketGrid2D couldn't insert object!");
-    };
 
 
 
