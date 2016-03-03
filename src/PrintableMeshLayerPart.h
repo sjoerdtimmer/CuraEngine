@@ -12,6 +12,7 @@ class PrintableMeshLayerPart : public PrintableLayerPart
 public:
     Polygons& getOutline();
     AABB getBoundaryBox();
+    int64_t getZ();
     void writeGCode(GCodePlanner& layer_plan);
     PrintableMeshLayerPart(SliceDataStorage& storage, unsigned int mesh_idx, unsigned int layer_idx, unsigned int part_idx);
 private:

@@ -15,7 +15,7 @@ void cura::PrintableLayerPart::generatePaths()
     {
         logError("WTF this layer part is already written to gcode@!!!!!");
     }
-    writePaths();
+    writeGcode();
     is_generated = true;
 }
 

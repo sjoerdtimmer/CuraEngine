@@ -26,7 +26,7 @@ protected:
     SliceDataStorage& storage;
     bool is_generated;
     
-    virtual void writePaths();
+    virtual void writeGcode();
     
     
     PrintableLayerPart(SliceDataStorage& storage);
