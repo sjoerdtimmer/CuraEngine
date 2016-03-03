@@ -3,6 +3,7 @@
 
 #include "utils/polygon.h"
 #include "utils/AABB.h"
+#include "sliceDataStorage.h"
 
 namespace cura
 {
@@ -15,13 +16,17 @@ namespace cura
  */
 class PrintableLayerPart
 {
+protected:
+    SliceDataStorage& storage;
 public:
     virtual Polygons& getOutline() = 0;
     virtual AABB getBoundaryBox() = 0;
     virtual int64_t getZ() = 0;
     virtual void writeGCode() = 0;
-protected:
-    SliceDataStorage& storage;
+    PrintableLayerPart(SliceDataStorage& storage)
+    : storage(storage)
+    {
+    }
     
 };
 

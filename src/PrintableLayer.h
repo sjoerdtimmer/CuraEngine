@@ -9,10 +9,8 @@ namespace cura
 {
 
 /*!
- * Abstract class for representing a printable part within a layer.
- * This could be a SliceLayerPart of a mesh, a piece of support, a prime tower, etc.
- * 
- * The PrintableLayerPart knows itself how it should generate its paths.
+ * Abstract class for representing all printable parts within a layer.
+ * This includes SliceLayerPart of a mesh, a piece of support, a prime tower, etc.
  */
 class PrintableLayer
 {
