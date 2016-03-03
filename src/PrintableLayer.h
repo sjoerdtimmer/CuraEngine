@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "PrintableLayerPart.h"
+#include "sliceDataStorage.h"
 
 namespace cura
 {
@@ -20,6 +21,7 @@ public:
     {
         return z;
     }
+    PrintableLayer(SliceDataStorage& storage, unsigned int layer_nr);
 private:
     int64_t z;
 };

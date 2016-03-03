@@ -60,7 +60,7 @@ private:
      * \param fillAngle The angle in the XY plane at which the infill is generated.
      * \param extrusionWidth extrusionWidth
      */
-    void processSkin(cura::GCodePlanner& gcode_layer, double infill_overlap, int infill_angle, int extrusion_width);
+    void processSkin(GCodePlanner& gcode_layer, double infill_overlap, int infill_angle, int extrusion_width);
     
 };
 

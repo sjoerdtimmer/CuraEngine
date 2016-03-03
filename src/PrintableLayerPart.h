@@ -16,17 +16,20 @@ namespace cura
  */
 class PrintableLayerPart
 {
-protected:
-    SliceDataStorage& storage;
 public:
     virtual Polygons& getOutline() = 0;
     virtual AABB getBoundaryBox() = 0;
     virtual int64_t getZ() = 0;
-    virtual void writeGCode() = 0;
-    PrintableLayerPart(SliceDataStorage& storage)
-    : storage(storage)
-    {
-    }
+    void generatePaths();
+    bool isGenerated();
+protected:
+    SliceDataStorage& storage;
+    bool is_generated;
+    
+    virtual void writePaths();
+    
+    
+    PrintableLayerPart(SliceDataStorage& storage);
     
 };
 
