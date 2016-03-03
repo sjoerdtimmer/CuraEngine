@@ -20,6 +20,9 @@ public:
     virtual AABB getBoundaryBox() = 0;
     virtual int64_t getZ() = 0;
     virtual void writeGCode() = 0;
+protected:
+    SliceDataStorage& storage;
+    
 };
 
 

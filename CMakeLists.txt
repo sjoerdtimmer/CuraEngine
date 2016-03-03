@@ -56,6 +56,7 @@ set(engine_SRCS # Except main.cpp.
     src/multiVolumes.cpp
     src/pathOrderOptimizer.cpp
     src/PrimeTower.cpp
+    src/PrintableMeshLayerPart.cpp
     src/Progress.cpp
     src/raft.cpp
     src/settingRegistry.cpp

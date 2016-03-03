@@ -8,7 +8,15 @@ namespace cura
 
 class PrintableMeshLayerPart : public PrintableLayerPart
 {
-    
+public:
+    Polygons& getOutline();
+    AABB getBoundaryBox() = 0;
+    int64_t getZ() = 0;
+    void writeGCode() = 0;
+private:
+    unsigned int mesh_idx;
+    unsigned int layer_idx;
+    unsigned int part_idx;
 };
 
 } // namespace cura
