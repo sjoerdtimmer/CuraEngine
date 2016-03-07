@@ -18,7 +18,7 @@
 #include "PrimeTower.h"
 #include "FanSpeedLayerTime.h"
 #include "PrintFeature.h"
-
+#include "PrintableLayer.h"
 
 #include "LayerPlanBuffer.h"
 

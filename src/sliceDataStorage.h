@@ -9,6 +9,7 @@
 #include "gcodePlanner.h"
 #include "MeshGroup.h"
 #include "PrimeTower.h"
+#include "PrintableLayer.h"
 
 namespace cura 
 {
@@ -134,6 +135,8 @@ public:
     
     Point3 model_size, model_min, model_max;
     std::vector<SliceMeshStorage> meshes;
+    
+    std::vector<PrintableLayer> printable_layers;
     
     std::vector<RetractionConfig> retraction_config_per_extruder; //!< used for support, skirt, etc.
     RetractionConfig retraction_config; //!< The retraction config used as fallback when getting the per_extruder_config or the mesh config was impossible (for travelConfig)
