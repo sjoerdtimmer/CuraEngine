@@ -22,7 +22,7 @@ public:
     /*! Find the best order to process layerpart. This includes finding towers. This function calls generatePaths() exactly once for every part in every layer that is passed in.
      *  \param layers the list of layers of parts
      */
-    void processPrintableLayers(std::vector<PrintableLayer>& layers);
+    static void processPrintableLayers(std::vector<PrintableLayer>& layers);
     
 private:
     
@@ -33,7 +33,7 @@ private:
      * 
      * \return area of the intersection of the parts
      */
-    double layerPartOverlapArea(PrintableLayerPart& part1, PrintableLayerPart& part2);
+    static double layerPartOverlapArea(PrintableLayerPart& part1, PrintableLayerPart& part2);
     
     
     /*! Determines whether printing part1 now will cause problems with printing part2 later. I.e. whether part2 hangs over or touches part1.
@@ -41,7 +41,7 @@ private:
      * \param part2 part to be printed later
      * \return whether this order of printing causes problems
      */
-    bool partBlocksOtherPart(PrintableLayerPart& part1, PrintableLayerPart& part2);
+    static bool partBlocksOtherPart(PrintableLayerPart& part1, PrintableLayerPart& part2);
     
     
     /*! Determines whether a part can be printed without obstructing future parts.
@@ -49,7 +49,7 @@ private:
      * \param layers the collection of layers to check for collisions
      * \return whether this part can be printed now.
      */
-    bool layerPartCanBePrintedNext(PrintableLayerPart& part,std::vector<PrintableLayer>& layers);
+    static bool layerPartCanBePrintedNext(PrintableLayerPart& part,std::vector<PrintableLayer>& layers);
     
     
     /*! From the list of layers, find a layerpart that fits nicely on to of the last extruded location.
@@ -59,7 +59,7 @@ private:
      * 
      * \return boolean, whether a part was found
      */
-    bool processNextPart(std::vector< PrintableLayer >& layers, int64_t max_z, Point last_extruder_location);
+    static bool processNextPart(std::vector< PrintableLayer >& layers, int64_t max_z, Point last_extruder_location);
 };
 
 }

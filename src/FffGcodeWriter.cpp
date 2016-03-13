@@ -5,6 +5,10 @@
 #include "FffProcessor.h"
 #include "Progress.h"
 #include "wallOverlap.h"
+#include "PrintableLayer.h"
+#include "PrintableLayerPart.h"
+#include "PrintableMeshLayerPart.h"
+#include "Towering.h"
 
 namespace cura
 {
@@ -67,10 +71,17 @@ void FffGcodeWriter::writeGCode(SliceDataStorage& storage, TimeKeeper& time_keep
     for (int extruder = 0; extruder < storage.meshgroup->getExtruderCount(); extruder++)
         last_prime_tower_poly_printed[extruder] = -1; // layer 0 has its prime tower printed during the brim (?)
     
+    
+    std::vector<PrintableLayer> layers;
+    layers.reserve(total_layers);
+    // create all layers: the constructor of PrintbleLayerPart will populate the layerparts from storage
     for(unsigned int layer_nr=0; layer_nr<total_layers; layer_nr++)
     {
-        processLayer(storage, layer_nr, total_layers, has_raft);
+        layers.emplace_back(storage,layer_nr);    
+        //processLayer(storage, layer_nr, total_layers, has_raft);
     }
+    // order all PrintableLayerParts with a smart algorithm: the ordering algorithm will call writeGcode on all parts in the right order
+    Towering::processPrintableLayers(layers);
     
     Progress::messageProgressStage(Progress::Stage::FINISH, &time_keeper);
 

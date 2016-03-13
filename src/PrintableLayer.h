@@ -2,9 +2,10 @@
 #define PRINTABLE_LAYER_H
 
 #include <vector>
-
+#include "PrintableLayer.h"
 #include "PrintableLayerPart.h"
 #include "sliceDataStorage.h"
+#include "PrintableMeshLayerPart.h"
 
 namespace cura
 {
@@ -16,7 +17,7 @@ namespace cura
 class PrintableLayer
 {
 public:
-    std::vector<PrintableLayerPart> parts;
+    std::vector<PrintableLayerPart*> parts; // has to be pointers because not all subtypes have the same size?
     int64_t getZ()
     {
         return z;

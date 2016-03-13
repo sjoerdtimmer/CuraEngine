@@ -26,10 +26,14 @@ protected:
     SliceDataStorage& storage;
     bool is_generated;
     
-    virtual void writeGcode();
+    virtual void writeGcode(GCodePlanner& layer_plan);
     
     
-    PrintableLayerPart(SliceDataStorage& storage);
+    PrintableLayerPart(SliceDataStorage& storage)
+    : storage(storage)
+    , is_generated(false)
+    {
+    }
     
 };
 

@@ -29,7 +29,7 @@ void Towering::processPrintableLayers(std::vector<PrintableLayer>& layers)
     // TODO: get the layer height from somewhere
     // TODO: make maximum lookahead configurable
     int layer_height = 100;//?.getSettingInMicrons('layer_height');
-    while( this->processNextPart(layers,max_generated_z + 3000 + layer_height, last_extruder_location) )
+    while( processNextPart(layers,max_generated_z + 3000 + layer_height, last_extruder_location) )
     {
 	// ...
     }   
@@ -45,12 +45,12 @@ bool Towering::processNextPart(std::vector< PrintableLayer >& layers, int64_t ma
 	if( candidatelayer.getZ() > max_z ) break; // don't look too far ahead
 	
 	// look for parts in this candidatelayer
-	for(PrintableLayerPart& candidatepart : candidatelayer.parts)
+	for(PrintableLayerPart* candidatepart : candidatelayer.parts)
 	{
-	    if(candidatepart.isGenerated()) continue; // parts that have already been generated cannot be generated again
-	    if(this->layerPartCanBePrintedNext(candidatepart,layers) && candidatepart.getOutline().inside(last_extruder_location))
+	    if(candidatepart->isGenerated()) continue; // parts that have already been generated cannot be generated again
+	    if(layerPartCanBePrintedNext(*candidatepart,layers) && candidatepart->getOutline().inside(last_extruder_location))
 	    {
-		candidatepart.generatePaths();
+                candidatepart->generatePaths();
 		return true;
 	    }
 	}
@@ -62,10 +62,10 @@ bool Towering::processNextPart(std::vector< PrintableLayer >& layers, int64_t ma
     log("tower finished, falling back to any other part\n");
     for(PrintableLayer& candidatelayer : layers)
     {
-	for(PrintableLayerPart& candidatepart : candidatelayer.parts){
-	    if( ! candidatepart.isGenerated())
+	for(PrintableLayerPart* candidatepart : candidatelayer.parts){
+	    if( ! candidatepart->isGenerated())
 	    {
-		candidatepart.generatePaths();
+		candidatepart->generatePaths();
 		return true;
 	    }
 	}
@@ -114,12 +114,12 @@ bool Towering::layerPartCanBePrintedNext(PrintableLayerPart& part, std::vector<P
 {
     for(PrintableLayer& otherlayer : layers)
     {
-	for(PrintableLayerPart& otherpart : otherlayer.parts)
+	for(PrintableLayerPart* otherpart : otherlayer.parts)
 	{
-	    if(otherpart.isGenerated()) continue; // already printed parts are never a reason not to print the current candidate
+	    if(otherpart->isGenerated()) continue; // already printed parts are never a reason not to print the current candidate
 	    // TODO: make sure that this is a valid way to check if part and otherpart are the same
-	    if(&part == &otherpart) continue;
-	    if(partBlocksOtherPart(part,otherpart)) return false;
+	    if(&part == otherpart) continue;
+	    if(partBlocksOtherPart(part,*otherpart)) return false;
 	}
     }
     return true;
