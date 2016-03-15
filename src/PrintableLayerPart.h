@@ -23,19 +23,22 @@ public:
     void generatePaths(GCodePlanner& layer_plan);
     bool isGenerated();
     int getExtruderNr();
+    int getLayerNr();
 protected:
     SliceDataStorage& storage;
     bool is_generated;
     int extruder_nr;
+    int layer_nr;
     
     
     virtual void writeGcode(GCodePlanner& layer_plan);
     
     
-    PrintableLayerPart(SliceDataStorage& storage, int extruder_nr)
+    PrintableLayerPart(SliceDataStorage& storage, int extruder_nr, int layer_nr)
     : storage(storage)
     , is_generated(false)
     , extruder_nr(extruder_nr)
+    , layer_nr(layer_nr)
     {
     }
     
