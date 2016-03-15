@@ -20,18 +20,22 @@ public:
     virtual Polygons& getOutline() = 0;
     virtual AABB getBoundaryBox() = 0;
     virtual int64_t getZ() = 0;
-    void generatePaths();
+    void generatePaths(GCodePlanner& layer_plan);
     bool isGenerated();
+    int getExtruderNr();
 protected:
     SliceDataStorage& storage;
     bool is_generated;
+    int extruder_nr;
+    
     
     virtual void writeGcode(GCodePlanner& layer_plan);
     
     
-    PrintableLayerPart(SliceDataStorage& storage)
+    PrintableLayerPart(SliceDataStorage& storage, int extruder_nr)
     : storage(storage)
     , is_generated(false)
+    , extruder_nr(extruder_nr)
     {
     }
     

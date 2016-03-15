@@ -42,13 +42,13 @@ bool Towering::processNextPart(std::vector< PrintableLayer >& layers, int64_t ma
     for( PrintableLayer& candidatelayer : layers )
     {
 	
-	if( candidatelayer.getZ() > max_z ) break; // don't look too far ahead
+	if (candidatelayer.getZ() > max_z ) break; // don't look too far ahead
 	
 	// look for parts in this candidatelayer
-	for(PrintableLayerPart* candidatepart : candidatelayer.parts)
+	for (PrintableLayerPart* candidatepart : candidatelayer.parts)
 	{
-	    if(candidatepart->isGenerated()) continue; // parts that have already been generated cannot be generated again
-	    if(layerPartCanBePrintedNext(*candidatepart,layers) && candidatepart->getOutline().inside(last_extruder_location))
+	    if (candidatepart->isGenerated()) continue; // parts that have already been generated cannot be generated again
+	    if (layerPartCanBePrintedNext(*candidatepart, layers) && candidatepart->getOutline().inside(last_extruder_location))
 	    {
                 candidatepart->generatePaths();
 		return true;

@@ -18,6 +18,9 @@
 #include "PrimeTower.h"
 #include "FanSpeedLayerTime.h"
 #include "PrintFeature.h"
+#include "PrintableLayer.h"
+#include "PrintableLayerPart.h"
+#include "PrintableMeshLayerPart.h"
 
 
 #include "LayerPlanBuffer.h"
@@ -132,14 +135,16 @@ private:
     void processRaft(SliceDataStorage& storage, unsigned int total_layers);
     
     /*!
+     * TODO: fix doc
      * Add a layer to the gcode.
      * \param storage Input: where the slice data is stored.
      * \param layer_nr The index of the layer to write the gcode of.
      * \param total_layers The total number of layers.
      * \param has_raft Whether a raft is used for this print.
      */
-    void processLayer(SliceDataStorage& storage, unsigned int layer_nr, unsigned int total_layers, bool has_raft);
     
+    GCodePlanner& processLayer(std::vector<PrintableLayerPart&>& parts, SliceDataStorage& storage, unsigned int total_layers);
+
     /*!
      * Add the skirt to the gcode.
      * \param storage Input: where the slice data is stored.
@@ -165,13 +170,15 @@ private:
     void processDraftShield(SliceDataStorage& storage, GCodePlanner& gcodeLayer, unsigned int layer_nr);
     
     /*!
+     * TODO: fix doc
      * Calculate in which order to print the meshes.
      * \param storage Input: where the slice data is stored.
      * \param current_extruder The current extruder with which we last printed
      * \return A vector of mesh indices ordered on print order.
      */
-    std::vector<unsigned int> calculateMeshOrder(SliceDataStorage& storage, int current_extruder);
-        
+ 
+    std::vector<unsigned int> calculatePrintablePartsOrder(std::vector<PrintableLayerPart>& parts, int current_extruder);
+
     /*!
      * Add a single layer from a single mesh-volume to the GCode in mesh surface mode.
      * \param storage Input: where the slice data is stored.

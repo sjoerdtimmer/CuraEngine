@@ -321,6 +321,11 @@ public:
         return layer_nr;
     }
     
+    int64_t getZ()
+    {
+        return z;
+    }
+    
     Point getLastPosition()
     {
         return lastPosition;

@@ -80,8 +80,24 @@ void FffGcodeWriter::writeGCode(SliceDataStorage& storage, TimeKeeper& time_keep
         layers.emplace_back(storage,layer_nr);    
         //processLayer(storage, layer_nr, total_layers, has_raft);
     }
+    /*
     // order all PrintableLayerParts with a smart algorithm: the ordering algorithm will call writeGcode on all parts in the right order
-    Towering::processPrintableLayers(layers);
+    Towering towering_processor(layers);
+    
+    GCodePlanner* prev = nullptr;
+    
+    for (Towering::iterator next_printable_part_group = towering_processor.begin(); next_printable_part_group != towering_processor.end(); ++next_printable_part_group)
+    {
+        std::vector<PrintableLayerPart&>& parts_in_same_layer = *next_printable_part_group;
+        if (prev)
+        {
+            // TODO : if prev->getZ() < parts_in_same_layer[0].getZ() then dont process minimal layer time!
+            prev->processFanSpeedAndMinimalLayerTime();
+        }
+        prev = &processLayer(parts_in_same_layer, storage, total_layers);
+    }
+    */
+    
     
     Progress::messageProgressStage(Progress::Stage::FINISH, &time_keeper);
 
@@ -364,9 +380,11 @@ void FffGcodeWriter::processRaft(SliceDataStorage& storage, unsigned int total_l
     }
 }
 
-void FffGcodeWriter::processLayer(SliceDataStorage& storage, unsigned int layer_nr, unsigned int total_layers, bool has_raft)
+GCodePlanner& FffGcodeWriter::processLayer(std::vector<PrintableLayerPart&>& parts, SliceDataStorage& storage, unsigned int total_layers)
 {
-    Progress::messageProgress(Progress::Stage::EXPORT, layer_nr+1, total_layers);
+    // Progress::messageProgress(Progress::Stage::EXPORT, layer_nr+1, total_layers);
+    
+    int layer_nr = parts.at(0).getLayerNr();
     
     int layer_thickness = getSettingInMicrons("layer_height");
     if (layer_nr == 0)
@@ -375,7 +393,7 @@ void FffGcodeWriter::processLayer(SliceDataStorage& storage, unsigned int layer_
     }
 
     int64_t comb_offset_from_outlines = storage.meshgroup->getExtruderTrain(current_extruder_planned)->getSettingInMicrons("machine_nozzle_size") * 2; // TODO: only used when there is no second wall.
-    int64_t z = storage.meshes[0].layers[layer_nr].printZ;
+    int64_t z = parts.at(0).getZ();
     GCodePlanner& gcode_layer = layer_plan_buffer.emplace_back(storage, layer_nr, z, layer_thickness, last_position_planned, current_extruder_planned, fan_speed_layer_time_settings, getSettingBoolean("retraction_combing"), comb_offset_from_outlines, getSettingBoolean("travel_avoid_other_parts"), getSettingInMicrons("travel_avoid_distance"));
     
     if (layer_nr == 0)
@@ -386,17 +404,14 @@ void FffGcodeWriter::processLayer(SliceDataStorage& storage, unsigned int layer_
     }
     
     int extruder_nr_before = gcode_layer.getExtruder();
-    addSupportToGCode(storage, gcode_layer, layer_nr, extruder_nr_before, true);
-
-    processOozeShield(storage, gcode_layer, layer_nr);
     
-    processDraftShield(storage, gcode_layer, layer_nr);
 
     //Figure out in which order to print the meshes, do this by looking at the current extruder and preferer the meshes that use that extruder.
-    std::vector<unsigned int> mesh_order = calculateMeshOrder(storage, gcode_layer.getExtruder());
+    std::vector<unsigned int> mesh_order = calculatePrintablePartsOrder(parts, gcode_layer.getExtruder());
     gcode_layer.setIsInside(true);
     for(unsigned int mesh_idx : mesh_order)
     {
+        /*
         SliceMeshStorage* mesh = &storage.meshes[mesh_idx];
         if (mesh->getSettingAsSurfaceMode("magic_mesh_surface_mode") == ESurfaceMode::SURFACE)
         {
@@ -408,11 +423,13 @@ void FffGcodeWriter::processLayer(SliceDataStorage& storage, unsigned int layer_
             gcode_layer.setIsInside(true); // needed when the last mesh was spiralized
             addMeshLayerToGCode(storage, mesh, gcode_layer, layer_nr);
         }
+        */
+        PrintableLayerPart& part = parts[mesh_idx];
+        part.generatePaths(gcode_layer);
     }
     gcode_layer.setIsInside(false);
     
-    addSupportToGCode(storage, gcode_layer, layer_nr, extruder_nr_before, false);
-
+    if (false) // TODO
     { // add prime tower if it hasn't already been added
         // print the prime tower if it hasn't been printed yet
         int prev_extruder = gcode_layer.getExtruder(); // most likely the same extruder as we are extruding with now
@@ -422,8 +439,10 @@ void FffGcodeWriter::processLayer(SliceDataStorage& storage, unsigned int layer_
     last_position_planned = gcode_layer.getLastPosition();
     current_extruder_planned = gcode_layer.getExtruder();
     
-    gcode_layer.processFanSpeedAndMinimalLayerTime();
+    return gcode_layer;
 }
+
+
 
 void FffGcodeWriter::processSkirt(SliceDataStorage& storage, GCodePlanner& gcode_layer, unsigned int extruder_nr)
 {
@@ -468,19 +487,22 @@ void FffGcodeWriter::processDraftShield(SliceDataStorage& storage, GCodePlanner&
     gcode_layer.addPolygonsByOptimizer(storage.draft_protection_shield, &storage.skirt_config[0]); // TODO: skirt config idx should correspond to draft shield extruder nr
 }
 
-std::vector<unsigned int> FffGcodeWriter::calculateMeshOrder(SliceDataStorage& storage, int current_extruder)
+
+std::vector<unsigned int> FffGcodeWriter::calculatePrintablePartsOrder(std::vector<PrintableLayerPart>& parts, int current_extruder)
 {
     std::vector<unsigned int> ret;
     std::list<unsigned int> add_list;
-    for(unsigned int mesh_idx = 0; mesh_idx < storage.meshes.size(); mesh_idx++)
+    for(unsigned int mesh_idx = 0; mesh_idx < parts.size(); mesh_idx++)
+    {
         add_list.push_back(mesh_idx);
-
+    }
+    
     int add_extruder_nr = current_extruder;
     while(add_list.size() > 0)
     {
         for(auto add_it = add_list.begin(); add_it != add_list.end(); )
         {
-            if (storage.meshes[*add_it].getSettingAsIndex("extruder_nr") == add_extruder_nr)
+            if (parts[*add_it].getExtruderNr() == add_extruder_nr)
             {
                 ret.push_back(*add_it);
                 add_it = add_list.erase(add_it);
@@ -491,7 +513,7 @@ std::vector<unsigned int> FffGcodeWriter::calculateMeshOrder(SliceDataStorage& s
             }
         }
         if (add_list.size() > 0)
-            add_extruder_nr = storage.meshes[*add_list.begin()].getSettingAsIndex("extruder_nr");
+            add_extruder_nr = parts[*add_list.begin()].getExtruderNr();
     }
     return ret;
 }
