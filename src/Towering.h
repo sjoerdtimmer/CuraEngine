@@ -8,49 +8,41 @@
 #ifndef TOWERING_H
 #define TOWERING_H
 
-//#include <vector>
-//#include "PrintableLayerPart.h"
 #include "PrintableLayer.h"
-//#include "mesh.h"
+
 
 namespace cura
 {
 
+/*! Find the best order to process layerpart. This includes finding towers.
+ *  \param layers the list of layers of parts
+ */
+    
 class Towering 
 {
 public:
-    /*! Find the best order to process layerpart. This includes finding towers. This function calls generatePaths() exactly once for every part in every layer that is passed in.
-     *  \param layers the list of layers of parts
-     */
-//    static void processPrintableLayers(std::vector<PrintableLayer>& layers);
     Towering(std::vector<PrintableLayer>& layers);
     
-    typedef std::vector<PrintableLayerPart*> iterable_type;
+//    typedef std::list<PrintableLayerPart*> LayerPartGroup;
+    typedef std::list<std::list<PrintableLayerPart *>>::const_iterator iterator; // const because we don't want anyone who gets hold of the iterator to modify our list
     
-    class const_iterator : std::iterator<std::input_iterator_tag, iterable_type> {
-        public:
-        typedef const_iterator self_type;  // typedef for this kind of iterator
-        typedef iterable_type value_type;
-        typedef iterable_type& reference;
-        typedef iterable_type* pointer;
-        typedef std::forward_iterator_tag iterator_category;
-
-        const_iterator(pointer ptr) : ptr_(ptr) { }
-        self_type operator++() { self_type i = *this; ptr_++; return i; }
-        self_type operator++(int junk) { ptr_++; return *this; }
-        const reference operator*() { return *ptr_; }
-        const pointer operator->() { return ptr_; }
-        bool operator==(const self_type& rhs) { return ptr_ == rhs.ptr_; }
-        bool operator!=(const self_type& rhs) { return ptr_ != rhs.ptr_; }
-        private:
-        pointer ptr_;
-    };
-    
-    const_iterator begin();
-    const_iterator end();
+    iterator begin(){
+        return groups.begin();
+    }
+    iterator end(){
+        return groups.end();
+    }
 
     
 private:
+    // 
+    std::list<std::list<PrintableLayerPart*>> groups;
+    std::vector<PrintableLayer>& layers;
+    
+    PrintableLayerPart* getNextPart(int max_z);
+    
+    std::list<PrintableLayerPart *> getNextGroup();
+    
     
     
     /*! Calculate the overlap area between two parts. This is no longer used. Was used to estimate the 'fitness' of the next part given the pevious part. Currently we simply check that the last_extruder_location is inside the part.

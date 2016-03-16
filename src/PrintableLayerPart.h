@@ -26,6 +26,8 @@ public:
     int getLayerNr();
 protected:
     SliceDataStorage& storage;
+    // TODO: maybe migrate the is_generated boolean to somewhere inside the Towering algorithm since it really is
+    // more of an implementation detail of that algorithm
     bool is_generated;
     int extruder_nr;
     int layer_nr;

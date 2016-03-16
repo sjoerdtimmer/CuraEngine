@@ -8,11 +8,8 @@ namespace cura {
 
     
 
-Towering::Towering(std::vector<PrintableLayer>& layers)
+Towering::Towering(std::vector<PrintableLayer>& layers):layers(layers)
 {
-//    PrintableLayerPart* last_processed;
-    
-
     // the first layer is special because it 'sits' on nothing.
     // All following layers assume that at least one layerpart has been printed 
     assert(layers.size() >= 1);
@@ -37,10 +34,21 @@ Towering::Towering(std::vector<PrintableLayer>& layers)
 
 
 
-bool Towering::processNextPart(std::vector< PrintableLayer >& layers, int64_t max_z, Point last_extruder_location)
+
+
+
+
+std::list<PrintableLayerPart*> Towering::getNextGroup() 
+{
+    
+}
+
+
+//bool Towering::processNextPart(std::vector< PrintableLayer >& layers, int64_t max_z, Point last_extruder_location)
+PrintableLayerPart* Towering::getNextPart(int max_z) 
 {
     // look for a candidate next layerpart that have overlap with last extruded point:
-    for( PrintableLayer& candidatelayer : layers )
+    for( PrintableLayer& candidatelayer : this->layers )
     {
 	
 	if (candidatelayer.getZ() > max_z ) break; // don't look too far ahead
@@ -49,10 +57,11 @@ bool Towering::processNextPart(std::vector< PrintableLayer >& layers, int64_t ma
 	for (PrintableLayerPart* candidatepart : candidatelayer.parts)
 	{
 	    if (candidatepart->isGenerated()) continue; // parts that have already been generated cannot be generated again
+            // TODO: don't use last extruded location but overlap with last printed part
 	    if (layerPartCanBePrintedNext(*candidatepart, layers) && candidatepart->getOutline().inside(last_extruder_location))
 	    {
-                candidatepart->generatePaths();
-		return true;
+//                candidatepart->generatePaths();
+		return candidatepart;
 	    }
 	}
     }
