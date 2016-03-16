@@ -143,7 +143,7 @@ private:
      * \param has_raft Whether a raft is used for this print.
      */
     
-    GCodePlanner& processLayer(std::vector<PrintableLayerPart&>& parts, SliceDataStorage& storage, unsigned int total_layers);
+    GCodePlanner& processLayer(std::vector<PrintableLayerPart*>& parts, SliceDataStorage& storage, unsigned int total_layers);
 
     /*!
      * Add the skirt to the gcode.

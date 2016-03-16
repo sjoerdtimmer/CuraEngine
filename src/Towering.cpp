@@ -1,15 +1,14 @@
 
 #include "settings.h"
 #include "PrintableLayer.h"
+#include "PrintableLayerPart.h"
 #include "Towering.h"
 
 namespace cura {
 
     
-/*! determines the best order to print layerparts such that overlapping layerpart are "towered".
- *  assumes that layers are ordered.
- */
-void Towering::processPrintableLayers(std::vector<PrintableLayer>& layers)
+
+Towering::Towering(std::vector<PrintableLayer>& layers)
 {
 //    PrintableLayerPart* last_processed;
     
@@ -34,6 +33,8 @@ void Towering::processPrintableLayers(std::vector<PrintableLayer>& layers)
 	// ...
     }   
 }
+
+
 
 
 bool Towering::processNextPart(std::vector< PrintableLayer >& layers, int64_t max_z, Point last_extruder_location)

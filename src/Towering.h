@@ -16,13 +16,39 @@
 namespace cura
 {
 
-class Towering
+class Towering 
 {
 public:
     /*! Find the best order to process layerpart. This includes finding towers. This function calls generatePaths() exactly once for every part in every layer that is passed in.
      *  \param layers the list of layers of parts
      */
-    static void processPrintableLayers(std::vector<PrintableLayer>& layers);
+//    static void processPrintableLayers(std::vector<PrintableLayer>& layers);
+    Towering(std::vector<PrintableLayer>& layers);
+    
+    typedef std::vector<PrintableLayerPart*> iterable_type;
+    
+    class const_iterator : std::iterator<std::input_iterator_tag, iterable_type> {
+        public:
+        typedef const_iterator self_type;  // typedef for this kind of iterator
+        typedef iterable_type value_type;
+        typedef iterable_type& reference;
+        typedef iterable_type* pointer;
+        typedef std::forward_iterator_tag iterator_category;
+
+        const_iterator(pointer ptr) : ptr_(ptr) { }
+        self_type operator++() { self_type i = *this; ptr_++; return i; }
+        self_type operator++(int junk) { ptr_++; return *this; }
+        const reference operator*() { return *ptr_; }
+        const pointer operator->() { return ptr_; }
+        bool operator==(const self_type& rhs) { return ptr_ == rhs.ptr_; }
+        bool operator!=(const self_type& rhs) { return ptr_ != rhs.ptr_; }
+        private:
+        pointer ptr_;
+    };
+    
+    const_iterator begin();
+    const_iterator end();
+
     
 private:
     

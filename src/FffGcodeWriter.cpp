@@ -80,13 +80,14 @@ void FffGcodeWriter::writeGCode(SliceDataStorage& storage, TimeKeeper& time_keep
         layers.emplace_back(storage,layer_nr);    
         //processLayer(storage, layer_nr, total_layers, has_raft);
     }
-    /*
+    
     // order all PrintableLayerParts with a smart algorithm: the ordering algorithm will call writeGcode on all parts in the right order
     Towering towering_processor(layers);
     
+    /*
     GCodePlanner* prev = nullptr;
     
-    for (Towering::iterator next_printable_part_group = towering_processor.begin(); next_printable_part_group != towering_processor.end(); ++next_printable_part_group)
+    for (Towering::const_iterator next_printable_part_group = towering_processor.begin(); next_printable_part_group != towering_processor.end(); ++next_printable_part_group)
     {
         std::vector<PrintableLayerPart&>& parts_in_same_layer = *next_printable_part_group;
         if (prev)
@@ -380,7 +381,7 @@ void FffGcodeWriter::processRaft(SliceDataStorage& storage, unsigned int total_l
     }
 }
 
-GCodePlanner& FffGcodeWriter::processLayer(std::vector<PrintableLayerPart&>& parts, SliceDataStorage& storage, unsigned int total_layers)
+GCodePlanner& FffGcodeWriter::processLayer(std::vector<PrintableLayerPart*>& parts, SliceDataStorage& storage, unsigned int total_layers)
 {
     // Progress::messageProgress(Progress::Stage::EXPORT, layer_nr+1, total_layers);
     
