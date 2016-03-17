@@ -35,7 +35,7 @@ private:
     
     PrintableLayerPart* getNextPart(Point last_extruder_location);
     
-    std::list<PrintableLayerPart *> getNextGroup(Point last_extruder_location);
+    std::list<PrintableLayerPart*> getNextGroup(Point last_extruder_location);
     
     
     
@@ -61,7 +61,7 @@ private:
      * \param layers the collection of layers to check for collisions
      * \return whether this part can be printed now.
      */
-    static bool layerPartCanBePrintedNext(PrintableLayerPart& part,std::vector<PrintableLayer>& layers);
+    static bool layerPartCanBePrintedNext(PrintableLayerPart& part, std::vector<PrintableLayer>& layers);
     
     
     /*! From the list of layers, find a layerpart that fits nicely on to of the last extruded location.
@@ -71,7 +71,7 @@ private:
      * 
      * \return boolean, whether a part was found
      */
-    static bool processNextPart(std::vector< PrintableLayer >& layers, int64_t max_z, Point last_extruder_location);
+    static bool processNextPart(std::vector< PrintableLayer>& layers, int64_t max_z, Point last_extruder_location);
 };
 
 }
