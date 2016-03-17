@@ -14,8 +14,9 @@ public:
     AABB getBoundaryBox();
     int64_t getZ();
     PrintableMeshLayerPart(SliceDataStorage& storage, unsigned int mesh_idx, unsigned int layer_idx, unsigned int part_idx);
-    void writeGCode(GCodePlanner& layer_plan);
+
 protected:
+    void writeGcode(GCodePlanner& gcode_layer);
 private:
     const unsigned int mesh_idx;
     const unsigned int layer_idx;
