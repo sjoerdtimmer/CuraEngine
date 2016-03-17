@@ -8,34 +8,32 @@
 #ifndef TOWERING_H
 #define TOWERING_H
 
-#include "PrintableLayer.h"
+#include <vector>
 
+#include "PrintableLayer.h"
 
 namespace cura
 {
 
 /*! Find the best order to process layerpart. This includes finding towers.
- *  \param layers the list of layers of parts
+ *  \param layers the vector of layers of parts
  */
     
 class Towering 
 {
 public:
     Towering(std::vector<PrintableLayer>& layers);
+    bool hasNext();
+   
+    PrintableLayerPart* getNextPart(Point last_extruder_location);
+   
+    std::vector<PrintableLayerPart *> getNextGroup(Point last_extruder_location);
     
-//    typedef std::list<PrintableLayerPart*> LayerPartGroup;
-//    typedef std::list<std::list<PrintableLayerPart *>>::const_iterator iterator; // const because we don't want anyone who gets hold of the iterator to modify our list
-    
-
     
 private:
 //    std::list<std::list<PrintableLayerPart *>> groups;
     std::vector<PrintableLayer>& layers;
     int64_t max_generated_z = 0;
-    
-    PrintableLayerPart* getNextPart(Point last_extruder_location);
-    
-    std::list<PrintableLayerPart*> getNextGroup(Point last_extruder_location);
     
     
     

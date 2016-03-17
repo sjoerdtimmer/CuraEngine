@@ -89,7 +89,7 @@ void FffGcodeWriter::writeGCode(SliceDataStorage& storage, TimeKeeper& time_keep
     
     while (towering_processor.hasNext())
     {
-        std::list<PrintableLayerPart*> parts_in_same_layer = towering_processor.getNextGroup(last_position_planned);
+        std::vector<PrintableLayerPart*> parts_in_same_layer = towering_processor.getNextGroup(last_position_planned);
         if (prev)
         {
             // TODO : if prev->getZ() < parts_in_same_layer[0].getZ() then dont process minimal layer time!
