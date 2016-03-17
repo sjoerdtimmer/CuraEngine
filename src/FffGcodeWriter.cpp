@@ -84,20 +84,21 @@ void FffGcodeWriter::writeGCode(SliceDataStorage& storage, TimeKeeper& time_keep
     // order all PrintableLayerParts with a smart algorithm: the ordering algorithm will call writeGcode on all parts in the right order
     Towering towering_processor(layers);
     
-    /*
+    
     GCodePlanner* prev = nullptr;
     
-    for (Towering::const_iterator next_printable_part_group = towering_processor.begin(); next_printable_part_group != towering_processor.end(); ++next_printable_part_group)
+    while (towering_processor.hasNext())
     {
-        std::vector<PrintableLayerPart&>& parts_in_same_layer = *next_printable_part_group;
+        std::list<PrintableLayerPart*> parts_in_same_layer = towering_processor.getNextGroup(last_position_planned);
         if (prev)
         {
             // TODO : if prev->getZ() < parts_in_same_layer[0].getZ() then dont process minimal layer time!
             prev->processFanSpeedAndMinimalLayerTime();
         }
         prev = &processLayer(parts_in_same_layer, storage, total_layers);
+        last_position_planned = prev->getLastPosition();
     }
-    */
+    
     
     
     Progress::messageProgressStage(Progress::Stage::FINISH, &time_keeper);
