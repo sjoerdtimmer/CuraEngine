@@ -22,7 +22,7 @@ class Towering
 {
 public:
     Towering(std::vector<PrintableLayer>& layers);
-    bool Towering::hasNext();
+    bool hasNext();
    
     PrintableLayerPart* getNextPart(Point last_extruder_location);
    

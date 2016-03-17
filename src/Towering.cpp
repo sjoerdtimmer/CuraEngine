@@ -57,9 +57,9 @@ std::list<PrintableLayerPart*> Towering::getNextGroup(Point last_extruder_locati
 bool Towering::hasNext(){
     for(PrintableLayer layer : layers)
     {
-        for(PrintableLayerPart part: layer.parts)
+        for(PrintableLayerPart* part: layer.parts)
         {
-            if(part.isGenerated()) return true;
+            if(part->isGenerated()) return true;
         }
     }
     return false;
