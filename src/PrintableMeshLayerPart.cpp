@@ -14,7 +14,7 @@ PrintableMeshLayerPart::PrintableMeshLayerPart(SliceDataStorage& storage, unsign
 , part_idx(part_idx)
 , mesh(storage.meshes[mesh_idx])
 , layer(mesh.layers[layer_idx])
-, part(layer.parts[layer_idx])
+, part(layer.parts[part_idx])
 {
 }
 

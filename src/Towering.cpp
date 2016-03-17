@@ -76,10 +76,11 @@ bool Towering::hasNext()
 PrintableLayerPart* Towering::getNextPart(Point last_extruder_location) 
 {
     // look for a candidate next layerpart that have overlap with last extruded point:
-    for( PrintableLayer& candidatelayer : this->layers )
+    for (unsigned int layer_idx = 0; layer_idx < layers.size(); layer_idx++)
     {
+        PrintableLayer& candidatelayer = layers[layer_idx];
         // TODO: make maximum lookahead configurable
-        if (candidatelayer.getZ() > max_generated_z+3000 )
+        if (candidatelayer.getZ() > max_generated_z + 3000 )
         {
             break; // don't look too far ahead
         }
