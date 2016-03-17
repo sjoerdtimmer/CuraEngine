@@ -27,7 +27,7 @@ Towering::Towering(std::vector<PrintableLayer>& layers):layers(layers)
 //    int layer_height = 100;//?.getSettingInMicrons('layer_height');
 //    while( processNextPart(layers,max_generated_z + 3000 + layer_height, last_extruder_location) )
 //    {
-	// ...
+    // ...
 //    }   
 }
 
@@ -77,21 +77,21 @@ PrintableLayerPart* Towering::getNextPart(Point last_extruder_location)
     // look for a candidate next layerpart that have overlap with last extruded point:
     for( PrintableLayer& candidatelayer : this->layers )
     {
-	// TODO: make maximum lookahead configurable
-	if (candidatelayer.getZ() > max_generated_z+3000 ) break; // don't look too far ahead
-	
-	// look for parts in this candidatelayer
-	for (PrintableLayerPart* candidatepart : candidatelayer.parts)
-	{
-	    if (candidatepart->isGenerated()) continue; // parts that have already been generated cannot be generated again
+    // TODO: make maximum lookahead configurable
+    if (candidatelayer.getZ() > max_generated_z+3000 ) break; // don't look too far ahead
+    
+    // look for parts in this candidatelayer
+    for (PrintableLayerPart* candidatepart : candidatelayer.parts)
+    {
+        if (candidatepart->isGenerated()) continue; // parts that have already been generated cannot be generated again
             // TODO: don't use last extruded location but overlap with last printed part
-	    if (layerPartCanBePrintedNext(*candidatepart, layers) && candidatepart->getOutline().inside(last_extruder_location))
-	    {
+        if (layerPartCanBePrintedNext(*candidatepart, layers) && candidatepart->getOutline().inside(last_extruder_location))
+        {
 //                candidatepart->generatePaths();
                 max_generated_z = candidatelayer.getZ();
-		return candidatepart;
-	    }
-	}
+        return candidatepart;
+        }
+    }
     }
     
     
@@ -100,13 +100,13 @@ PrintableLayerPart* Towering::getNextPart(Point last_extruder_location)
     log("tower finished, falling back to any other part\n");
     for(PrintableLayer& candidatelayer : layers)
     {
-	for(PrintableLayerPart* candidatepart : candidatelayer.parts){
-	    if( ! candidatepart->isGenerated())
-	    {
+    for(PrintableLayerPart* candidatepart : candidatelayer.parts){
+        if( ! candidatepart->isGenerated())
+        {
                 max_generated_z = candidatelayer.getZ();
-		return candidatepart;
-	    }
-	}
+        return candidatepart;
+        }
+    }
     }
     
     
@@ -121,17 +121,23 @@ PrintableLayerPart* Towering::getNextPart(Point last_extruder_location)
 bool Towering::partBlocksOtherPart(PrintableLayerPart& part1, PrintableLayerPart& part2)
 {
     // some quick heuristics to save time:
-    if(part1.getZ() <= part2.getZ()) return false;       // lower layers never block higher layers
-    if(part2.getZ() - part2.getZ() > 3000) return true;  // never print more than 3mm before catching up. 
+    if (part1.getZ() <= part2.getZ())
+    {
+        return false;       // lower layers never block higher layers
+    }
+    if (part2.getZ() - part2.getZ() > 3000) // TODO hardcoded value
+    {
+        return true;  // never print more than 3mm before catching up. 
+    }
     
     Polygons& outline1 = part1.getOutline();
     Polygons& outline2 = part2.getOutline();
     
-    Polygons keepoutarea = outline2.offset(3000+part1.getZ()-part2.getZ(),ClipperLib::jtRound);
+    Polygons keepoutarea = outline2.offset(3000 + part1.getZ() - part2.getZ()); //, ClipperLib::jtRound); // TODO hardcoded value
     
-    if(keepoutarea.intersection(outline1).size() > 0)
+    if (keepoutarea.intersection(outline1).size() > 0)
     {
-	return true;
+        return true;
     }
     return false;  
 }
@@ -142,7 +148,7 @@ double Towering::layerPartOverlapArea(PrintableLayerPart& part1, PrintableLayerP
     double area = 0;
     for(PolygonRef polygon : part1.getOutline().intersection(part2.getOutline()))
     {
-	area += polygon.area();
+    area += polygon.area();
     }
     return area;
 }
@@ -152,13 +158,22 @@ bool Towering::layerPartCanBePrintedNext(PrintableLayerPart& part, std::vector<P
 {
     for(PrintableLayer& otherlayer : layers)
     {
-	for(PrintableLayerPart* otherpart : otherlayer.parts)
-	{
-	    if(otherpart->isGenerated()) continue; // already printed parts are never a reason not to print the current candidate
-	    // TODO: make sure that this is a valid way to check if part and otherpart are the same
-	    if(&part == otherpart) continue;
-	    if(partBlocksOtherPart(part,*otherpart)) return false;
-	}
+        for(PrintableLayerPart* otherpart : otherlayer.parts)
+        {
+            if(otherpart->isGenerated())
+            {
+                continue; // already printed parts are never a reason not to print the current candidate
+            }
+            // TODO: make sure that this is a valid way to check if part and otherpart are the same
+            if (&part == otherpart)
+            {
+                continue;
+            }
+            if (partBlocksOtherPart(part, *otherpart))
+            {
+                return false;
+            }
+        }
     }
     return true;
 }
