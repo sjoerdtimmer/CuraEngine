@@ -22,6 +22,8 @@ public:
     virtual int64_t getZ() = 0;
     void generatePaths(GCodePlanner& layer_plan);
     bool isGenerated();
+    bool isPicked();
+    void pick();
 
     unsigned int getExtruderNr();
     unsigned int getLayerNr();
@@ -32,6 +34,7 @@ protected:
     // TODO: maybe migrate the is_generated boolean to somewhere inside the Towering algorithm since it really is
     // more of an implementation detail of that algorithm
     bool is_generated;
+    bool is_picked;
     unsigned int extruder_nr;
     unsigned int layer_nr;
         
@@ -39,6 +42,7 @@ protected:
     PrintableLayerPart(SliceDataStorage& storage, unsigned int extruder_nr, unsigned int layer_nr)
     : storage(storage)
     , is_generated(false)
+    , is_picked(false)
     , extruder_nr(extruder_nr)
     , layer_nr(layer_nr)
     {

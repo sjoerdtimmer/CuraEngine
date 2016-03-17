@@ -46,8 +46,10 @@ std::vector<PrintableLayerPart*> Towering::getNextGroup(Point last_extruder_loca
     res.push_back(getNextPart(last_extruder_location));// at least one is added
     PrintableLayerPart* next = getNextPart(last_extruder_location); // TODO: last extruder location should be replaced by a location inside the previous part
     
-    while(next && next->getZ() == res.front()->getZ())
+    
+    while (next && next->getZ() == res.front()->getZ())
     {
+        next->pick();
         res.push_back(next);
         next = getNextPart(last_extruder_location);
     }
@@ -62,7 +64,7 @@ bool Towering::hasNext()
     {
         for (PrintableLayerPart* part: layer.parts)
         {
-            if (!part->isGenerated())
+            if (!part->isGenerated() && !part->isPicked())
             {
                 return true;
             }
@@ -88,7 +90,7 @@ PrintableLayerPart* Towering::getNextPart(Point last_extruder_location)
         // look for parts in this candidatelayer
         for (PrintableLayerPart* candidatepart : candidatelayer.parts)
         {
-            if (candidatepart->isGenerated())
+            if (candidatepart->isGenerated() || candidatepart->isPicked())
             {
                 continue; // parts that have already been generated cannot be generated again
             }
@@ -110,7 +112,7 @@ PrintableLayerPart* Towering::getNextPart(Point last_extruder_location)
     {
         for (PrintableLayerPart* candidatepart : candidatelayer.parts)
         {
-            if (!candidatepart->isGenerated())
+            if (!candidatepart->isGenerated() && !candidatepart->isPicked())
             {
                 max_generated_z = candidatelayer.getZ();
                 return candidatepart;
@@ -169,7 +171,7 @@ bool Towering::layerPartCanBePrintedNext(PrintableLayerPart& part, std::vector<P
     {
         for (PrintableLayerPart* otherpart : otherlayer.parts)
         {
-            if (otherpart->isGenerated())
+            if (otherpart->isGenerated() || otherpart->isPicked())
             {
                 continue; // already printed parts are never a reason not to print the current candidate
             }

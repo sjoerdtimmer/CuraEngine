@@ -18,6 +18,17 @@ bool PrintableLayerPart::isGenerated()
     return is_generated;
 }
 
+bool PrintableLayerPart::isPicked()
+{
+    return is_picked;
+}
+
+void PrintableLayerPart::pick()
+{
+    is_picked = true;
+}
+
+
 void PrintableLayerPart::generatePaths(GCodePlanner& layer_plan)
 {
     if (is_generated)
