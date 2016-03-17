@@ -15,7 +15,8 @@ public:
     int64_t getZ();
     PrintableMeshLayerPart(SliceDataStorage& storage, unsigned int mesh_idx, unsigned int layer_idx, unsigned int part_idx);
 protected:
-    void writeGCode(GCodePlanner& layer_plan);
+    void writeGCode(GCodePlanner& gcode_layer);
+
 private:
     const unsigned int mesh_idx;
     const unsigned int layer_idx;
