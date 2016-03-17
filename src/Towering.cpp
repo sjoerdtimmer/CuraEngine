@@ -16,19 +16,19 @@ Towering::Towering(std::vector<PrintableLayer>& layers):layers(layers)
     assert(layers.front().parts.size() >= 1);
     // TODO: start with the one closest to startpoint
 //     last_processed = &(layers.front().parts.front());
-    int64_t max_generated_z = layers.front().getZ();
+//    int64_t max_generated_z = layers.front().getZ();
     // TODO: maybe store the highest processed layernumber instead??
 //     last_processed->generatePaths();
     
-    Point last_extruder_location = Point(0,0);// TODO: figure out what the last extruder location was
+//    Point last_extruder_location = Point(0,0);// TODO: figure out what the last extruder location was
     
     // TODO: get the layer height from somewhere
     // TODO: make maximum lookahead configurable
-    int layer_height = 100;//?.getSettingInMicrons('layer_height');
-    while( processNextPart(layers,max_generated_z + 3000 + layer_height, last_extruder_location) )
-    {
+//    int layer_height = 100;//?.getSettingInMicrons('layer_height');
+//    while( processNextPart(layers,max_generated_z + 3000 + layer_height, last_extruder_location) )
+//    {
 	// ...
-    }   
+//    }   
 }
 
 
@@ -38,20 +38,27 @@ Towering::Towering(std::vector<PrintableLayer>& layers):layers(layers)
 
 
 
-std::list<PrintableLayerPart*> Towering::getNextGroup() 
+std::list<PrintableLayerPart*> Towering::getNextGroup(Point last_extruder_location) 
 {
-    
+    std::list<PrintableLayerPart *> res;
+    res.push_back(getNextPart(last_extruder_location));// at least one is added
+    PrintableLayerPart* next = getNextPart(last_extruder_location); // TODO: last extruder location should be replaced by a location inside the previous part
+    while(next && next->getZ() == res.front()->getZ()){
+        res.push_back(next);
+        next = getNextPart(last_extruder_location);
+    }
+    return res;
 }
 
 
 //bool Towering::processNextPart(std::vector< PrintableLayer >& layers, int64_t max_z, Point last_extruder_location)
-PrintableLayerPart* Towering::getNextPart(int max_z) 
+PrintableLayerPart* Towering::getNextPart(Point last_extruder_location) 
 {
     // look for a candidate next layerpart that have overlap with last extruded point:
     for( PrintableLayer& candidatelayer : this->layers )
     {
-	
-	if (candidatelayer.getZ() > max_z ) break; // don't look too far ahead
+	// TODO: make maximum lookahead configurable
+	if (candidatelayer.getZ() > max_generated_z+3000 ) break; // don't look too far ahead
 	
 	// look for parts in this candidatelayer
 	for (PrintableLayerPart* candidatepart : candidatelayer.parts)
@@ -61,6 +68,7 @@ PrintableLayerPart* Towering::getNextPart(int max_z)
 	    if (layerPartCanBePrintedNext(*candidatepart, layers) && candidatepart->getOutline().inside(last_extruder_location))
 	    {
 //                candidatepart->generatePaths();
+                max_generated_z = candidatelayer.getZ();
 		return candidatepart;
 	    }
 	}
@@ -75,8 +83,8 @@ PrintableLayerPart* Towering::getNextPart(int max_z)
 	for(PrintableLayerPart* candidatepart : candidatelayer.parts){
 	    if( ! candidatepart->isGenerated())
 	    {
-		candidatepart->generatePaths();
-		return true;
+                max_generated_z = candidatelayer.getZ();
+		return candidatepart;
 	    }
 	}
     }
@@ -84,7 +92,7 @@ PrintableLayerPart* Towering::getNextPart(int max_z)
     
     // if all parts have been generated
     log("all parts have been generated\n");
-    return false;
+    return NULL;
 }
 
 

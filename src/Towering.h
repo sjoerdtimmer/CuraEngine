@@ -24,24 +24,18 @@ public:
     Towering(std::vector<PrintableLayer>& layers);
     
 //    typedef std::list<PrintableLayerPart*> LayerPartGroup;
-    typedef std::list<std::list<PrintableLayerPart *>>::const_iterator iterator; // const because we don't want anyone who gets hold of the iterator to modify our list
+//    typedef std::list<std::list<PrintableLayerPart *>>::const_iterator iterator; // const because we don't want anyone who gets hold of the iterator to modify our list
     
-    iterator begin(){
-        return groups.begin();
-    }
-    iterator end(){
-        return groups.end();
-    }
 
     
 private:
-    // 
-    std::list<std::list<PrintableLayerPart*>> groups;
+//    std::list<std::list<PrintableLayerPart *>> groups;
     std::vector<PrintableLayer>& layers;
+    int64_t max_generated_z = 0;
     
-    PrintableLayerPart* getNextPart(int max_z);
+    PrintableLayerPart* getNextPart(Point last_extruder_location);
     
-    std::list<PrintableLayerPart *> getNextGroup();
+    std::list<PrintableLayerPart *> getNextGroup(Point last_extruder_location);
     
     
     
