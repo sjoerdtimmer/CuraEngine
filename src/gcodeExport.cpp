@@ -86,7 +86,7 @@ EGCodeFlavor GCodeExport::getFlavor()
 
 void GCodeExport::setZ(int z)
 {
-    this->zPos = z;
+    zPos_next_extrusion_move = z;
 }
 
 Point3 GCodeExport::getPosition()
@@ -336,6 +336,23 @@ void GCodeExport::writeMove(int x, int y, int z, double speed, double extrusion_
     if (extrusion_mm3_per_mm < 0)
         logWarning("Warning! Negative extrusion move!");
 
+    
+    if (extrusion_mm3_per_mm > 0.000001 && z == zPos)
+    {
+        zPos = zPos_next_extrusion_move;
+        z = zPos;
+        if (z + isZHopped < getPositionZ())
+        {
+            *output_stream << "G0 Z" << INT2MM(z + isZHopped) << "\n";
+        }
+    }
+    if (extrusion_mm3_per_mm <= 0.000001 && z + isZHopped > getPositionZ())
+    {
+        *output_stream << "G0 Z" << INT2MM(z + isZHopped) << "\n";
+    }
+    
+    
+    
     if (flavor == EGCodeFlavor::BFB)
     {
         writeMoveBFB(x, y, z, speed, extrusion_mm3_per_mm);
@@ -420,7 +437,7 @@ void GCodeExport::writeMove(int x, int y, int z, double speed, double extrusion_
     *output_stream << std::setprecision(3) << 
         " X" << INT2MM(gcode_pos.X) << 
         " Y" << INT2MM(gcode_pos.Y);
-    if (z != currentPosition.z + isZHopped)
+    if (extrusion_mm3_per_mm > 0.000001 && z != currentPosition.z + isZHopped)
         *output_stream << " Z" << INT2MM(z + isZHopped);
     if (extrusion_mm3_per_mm > 0.000001)
         *output_stream << " " << extruder_attr[current_extruder].extruderCharacter << std::setprecision(5) << current_e_value;
