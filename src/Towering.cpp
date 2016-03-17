@@ -4,7 +4,8 @@
 #include "PrintableLayerPart.h"
 #include "Towering.h"
 
-namespace cura {
+namespace cura
+{
 
     
 
@@ -40,7 +41,7 @@ Towering::Towering(std::vector<PrintableLayer>& layers):layers(layers)
 
 std::vector<PrintableLayerPart*> Towering::getNextGroup(Point last_extruder_location) 
 {
-    std::vector<PrintableLayerPart *> res;
+    std::vector<PrintableLayerPart*> res;
     
     res.push_back(getNextPart(last_extruder_location));// at least one is added
     PrintableLayerPart* next = getNextPart(last_extruder_location); // TODO: last extruder location should be replaced by a location inside the previous part
@@ -77,36 +78,43 @@ PrintableLayerPart* Towering::getNextPart(Point last_extruder_location)
     // look for a candidate next layerpart that have overlap with last extruded point:
     for( PrintableLayer& candidatelayer : this->layers )
     {
-    // TODO: make maximum lookahead configurable
-    if (candidatelayer.getZ() > max_generated_z+3000 ) break; // don't look too far ahead
-    
-    // look for parts in this candidatelayer
-    for (PrintableLayerPart* candidatepart : candidatelayer.parts)
-    {
-        if (candidatepart->isGenerated()) continue; // parts that have already been generated cannot be generated again
-            // TODO: don't use last extruded location but overlap with last printed part
-        if (layerPartCanBePrintedNext(*candidatepart, layers) && candidatepart->getOutline().inside(last_extruder_location))
+        // TODO: make maximum lookahead configurable
+        if (candidatelayer.getZ() > max_generated_z+3000 )
         {
+            break; // don't look too far ahead
+        }
+        
+        // look for parts in this candidatelayer
+        for (PrintableLayerPart* candidatepart : candidatelayer.parts)
+        {
+            if (candidatepart->isGenerated())
+            {
+                continue; // parts that have already been generated cannot be generated again
+            }
+                // TODO: don't use last extruded location but overlap with last printed part
+            if (layerPartCanBePrintedNext(*candidatepart, layers) && candidatepart->getOutline().inside(last_extruder_location))
+            {
 //                candidatepart->generatePaths();
                 max_generated_z = candidatelayer.getZ();
-        return candidatepart;
+                return candidatepart;
+            }
         }
-    }
     }
     
     
     
     // no good part found: fall back to simply the next
     log("tower finished, falling back to any other part\n");
-    for(PrintableLayer& candidatelayer : layers)
+    for (PrintableLayer& candidatelayer : layers)
     {
-    for(PrintableLayerPart* candidatepart : candidatelayer.parts){
-        if( ! candidatepart->isGenerated())
+        for (PrintableLayerPart* candidatepart : candidatelayer.parts)
         {
+            if (!candidatepart->isGenerated())
+            {
                 max_generated_z = candidatelayer.getZ();
-        return candidatepart;
+                return candidatepart;
+            }
         }
-    }
     }
     
     
@@ -146,9 +154,9 @@ bool Towering::partBlocksOtherPart(PrintableLayerPart& part1, PrintableLayerPart
 double Towering::layerPartOverlapArea(PrintableLayerPart& part1, PrintableLayerPart& part2)
 {
     double area = 0;
-    for(PolygonRef polygon : part1.getOutline().intersection(part2.getOutline()))
+    for (PolygonRef polygon : part1.getOutline().intersection(part2.getOutline()))
     {
-    area += polygon.area();
+        area += polygon.area();
     }
     return area;
 }
@@ -156,11 +164,11 @@ double Towering::layerPartOverlapArea(PrintableLayerPart& part1, PrintableLayerP
 
 bool Towering::layerPartCanBePrintedNext(PrintableLayerPart& part, std::vector<PrintableLayer>& layers)
 {
-    for(PrintableLayer& otherlayer : layers)
+    for (PrintableLayer& otherlayer : layers)
     {
-        for(PrintableLayerPart* otherpart : otherlayer.parts)
+        for (PrintableLayerPart* otherpart : otherlayer.parts)
         {
-            if(otherpart->isGenerated())
+            if (otherpart->isGenerated())
             {
                 continue; // already printed parts are never a reason not to print the current candidate
             }
@@ -178,4 +186,4 @@ bool Towering::layerPartCanBePrintedNext(PrintableLayerPart& part, std::vector<P
     return true;
 }
 
-}
+} // namespace cura
