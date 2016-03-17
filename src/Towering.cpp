@@ -41,13 +41,28 @@ Towering::Towering(std::vector<PrintableLayer>& layers):layers(layers)
 std::list<PrintableLayerPart*> Towering::getNextGroup(Point last_extruder_location) 
 {
     std::list<PrintableLayerPart *> res;
+    
     res.push_back(getNextPart(last_extruder_location));// at least one is added
     PrintableLayerPart* next = getNextPart(last_extruder_location); // TODO: last extruder location should be replaced by a location inside the previous part
+    
     while(next && next->getZ() == res.front()->getZ()){
         res.push_back(next);
         next = getNextPart(last_extruder_location);
     }
     return res;
+}
+
+
+// TODO: there probably is a better way to do this since getNext always calculated one more than necessary...
+bool Towering::hasNext(){
+    for(PrintableLayer layer : layers)
+    {
+        for(PrintableLayerPart part: layer.parts)
+        {
+            if(part.isGenerated()) return true;
+        }
+    }
+    return false;
 }
 
 
