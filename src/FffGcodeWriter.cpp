@@ -409,9 +409,9 @@ GCodePlanner& FffGcodeWriter::processLayer(std::vector<PrintableLayerPart*>& par
     
 
     //Figure out in which order to print the meshes, do this by looking at the current extruder and preferer the meshes that use that extruder.
-    std::vector<unsigned int> mesh_order = calculatePrintablePartsOrder(parts, gcode_layer.getExtruder());
+    std::vector<unsigned int> part_order = calculatePrintablePartsOrder(parts, gcode_layer.getExtruder());
     gcode_layer.setIsInside(true);
-    for(unsigned int mesh_idx : mesh_order)
+    for(unsigned int part_idx : part_order)
     {
         /*
         SliceMeshStorage* mesh = &storage.meshes[mesh_idx];
@@ -426,7 +426,7 @@ GCodePlanner& FffGcodeWriter::processLayer(std::vector<PrintableLayerPart*>& par
             addMeshLayerToGCode(storage, mesh, gcode_layer, layer_nr);
         }
         */
-        PrintableLayerPart& part = *parts[mesh_idx];
+        PrintableLayerPart& part = *parts[part_idx];
         part.generatePaths(gcode_layer);
     }
     gcode_layer.setIsInside(false);

@@ -43,7 +43,10 @@ std::vector<PrintableLayerPart*> Towering::getNextGroup(Point last_extruder_loca
 {
     std::vector<PrintableLayerPart*> res;
     
-    res.push_back(getNextPart(last_extruder_location));// at least one is added
+    
+    PrintableLayerPart* first = getNextPart(last_extruder_location);
+    first->pick();
+    res.push_back(first);// at least one is added
     PrintableLayerPart* next = getNextPart(last_extruder_location); // TODO: last extruder location should be replaced by a location inside the previous part
     
     
