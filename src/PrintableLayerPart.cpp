@@ -3,12 +3,12 @@
 namespace cura
 {
 
-int PrintableLayerPart::getExtruderNr()
+unsigned int PrintableLayerPart::getExtruderNr()
 {
     return extruder_nr;
 }
 
-int PrintableLayerPart::getLayerNr()
+unsigned int PrintableLayerPart::getLayerNr()
 {
     return layer_nr;
 }
@@ -24,7 +24,7 @@ void PrintableLayerPart::generatePaths(GCodePlanner& layer_plan)
     {
         logError("WTF this layer part is already written to gcode@!!!!!");
     }
-    writeGCode(layer_plan);
+    writeGcode(layer_plan);
     is_generated = true;
 }
 
