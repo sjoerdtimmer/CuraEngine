@@ -8,7 +8,7 @@ int PrintableLayerPart::getExtruderNr()
     return extruder_nr;
 }
 
-int getLayerNr()
+int PrintableLayerPart::getLayerNr()
 {
     return layer_nr;
 }

@@ -385,7 +385,7 @@ GCodePlanner& FffGcodeWriter::processLayer(std::vector<PrintableLayerPart*>& par
 {
     // Progress::messageProgress(Progress::Stage::EXPORT, layer_nr+1, total_layers);
     
-    int layer_nr = parts.at(0).getLayerNr();
+    int layer_nr = parts[0]->getLayerNr();
     
     int layer_thickness = getSettingInMicrons("layer_height");
     if (layer_nr == 0)
@@ -394,7 +394,7 @@ GCodePlanner& FffGcodeWriter::processLayer(std::vector<PrintableLayerPart*>& par
     }
 
     int64_t comb_offset_from_outlines = storage.meshgroup->getExtruderTrain(current_extruder_planned)->getSettingInMicrons("machine_nozzle_size") * 2; // TODO: only used when there is no second wall.
-    int64_t z = parts.at(0).getZ();
+    int64_t z = parts[0]->getZ();
     GCodePlanner& gcode_layer = layer_plan_buffer.emplace_back(storage, layer_nr, z, layer_thickness, last_position_planned, current_extruder_planned, fan_speed_layer_time_settings, getSettingBoolean("retraction_combing"), comb_offset_from_outlines, getSettingBoolean("travel_avoid_other_parts"), getSettingInMicrons("travel_avoid_distance"));
     
     if (layer_nr == 0)
@@ -425,7 +425,7 @@ GCodePlanner& FffGcodeWriter::processLayer(std::vector<PrintableLayerPart*>& par
             addMeshLayerToGCode(storage, mesh, gcode_layer, layer_nr);
         }
         */
-        PrintableLayerPart& part = parts[mesh_idx];
+        PrintableLayerPart& part = *parts[mesh_idx];
         part.generatePaths(gcode_layer);
     }
     gcode_layer.setIsInside(false);
@@ -489,7 +489,7 @@ void FffGcodeWriter::processDraftShield(SliceDataStorage& storage, GCodePlanner&
 }
 
 
-std::vector<unsigned int> FffGcodeWriter::calculatePrintablePartsOrder(std::vector<PrintableLayerPart>& parts, int current_extruder)
+std::vector<unsigned int> FffGcodeWriter::calculatePrintablePartsOrder(std::vector<PrintableLayerPart*>& parts, int current_extruder)
 {
     std::vector<unsigned int> ret;
     std::list<unsigned int> add_list;
@@ -503,7 +503,7 @@ std::vector<unsigned int> FffGcodeWriter::calculatePrintablePartsOrder(std::vect
     {
         for(auto add_it = add_list.begin(); add_it != add_list.end(); )
         {
-            if (parts[*add_it].getExtruderNr() == add_extruder_nr)
+            if (parts[*add_it]->getExtruderNr() == add_extruder_nr)
             {
                 ret.push_back(*add_it);
                 add_it = add_list.erase(add_it);
@@ -514,7 +514,7 @@ std::vector<unsigned int> FffGcodeWriter::calculatePrintablePartsOrder(std::vect
             }
         }
         if (add_list.size() > 0)
-            add_extruder_nr = parts[*add_list.begin()].getExtruderNr();
+            add_extruder_nr = parts[*add_list.begin()]->getExtruderNr();
     }
     return ret;
 }

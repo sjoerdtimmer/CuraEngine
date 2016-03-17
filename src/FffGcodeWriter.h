@@ -177,7 +177,7 @@ private:
      * \return A vector of mesh indices ordered on print order.
      */
  
-    std::vector<unsigned int> calculatePrintablePartsOrder(std::vector<PrintableLayerPart>& parts, int current_extruder);
+    std::vector<unsigned int> calculatePrintablePartsOrder(std::vector<PrintableLayerPart*>& parts, int current_extruder);
 
     /*!
      * Add a single layer from a single mesh-volume to the GCode in mesh surface mode.
