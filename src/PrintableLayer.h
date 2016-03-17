@@ -2,7 +2,7 @@
 #define PRINTABLE_LAYER_H
 
 #include <vector>
-#include "PrintableLayer.h"
+
 #include "PrintableLayerPart.h"
 #include "sliceDataStorage.h"
 #include "PrintableMeshLayerPart.h"

@@ -25,8 +25,8 @@ public:
     int getExtruderNr();
     int getLayerNr();
     
+    virtual void writeGCode(GCodePlanner& layer_plan) = 0;
 protected:
-    virtual void writeGcode(GCodePlanner& layer_plan) = 0;
     
     SliceDataStorage& storage;
     // TODO: maybe migrate the is_generated boolean to somewhere inside the Towering algorithm since it really is

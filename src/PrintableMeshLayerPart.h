@@ -14,8 +14,8 @@ public:
     AABB getBoundaryBox();
     int64_t getZ();
     PrintableMeshLayerPart(SliceDataStorage& storage, unsigned int mesh_idx, unsigned int layer_idx, unsigned int part_idx);
-protected:
     void writeGCode(GCodePlanner& layer_plan);
+protected:
 private:
     const unsigned int mesh_idx;
     const unsigned int layer_idx;
@@ -30,7 +30,7 @@ private:
      * \param gcodeLayer The initial planning of the gcode of the layer.
      * \param z_seam_type dir3ective for where to start the outer paerimeter of a part
      */
-    void processInsets(GCodePlanner& gcodeLayer,EZSeamType z_seam_type);
+    void processInsets(GCodePlanner& gcodeLayer, EZSeamType z_seam_type);
 
     /*!
      * Add thicker (multiple layers) sparse infill for a given part in a layer.

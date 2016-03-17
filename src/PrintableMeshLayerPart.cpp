@@ -34,7 +34,6 @@ int64_t PrintableMeshLayerPart::getZ()
     return layer.printZ;
 }
 
-
 void PrintableMeshLayerPart::writeGCode(GCodePlanner& gcode_layer)
 {
     if (int(layer_idx) > mesh.layer_nr_max_filled_layer)

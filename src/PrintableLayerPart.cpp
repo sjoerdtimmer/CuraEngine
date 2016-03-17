@@ -24,7 +24,7 @@ void PrintableLayerPart::generatePaths(GCodePlanner& layer_plan)
     {
         logError("WTF this layer part is already written to gcode@!!!!!");
     }
-    writeGcode(layer_plan);
+    writeGCode(layer_plan);
     is_generated = true;
 }
 
