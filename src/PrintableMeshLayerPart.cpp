@@ -2,12 +2,13 @@
 #include "PrintableLayerPart.h"
 #include "infill.h"
 #include "bridge.h"
+#include "settings.h"
 
 namespace cura
 {
 
 PrintableMeshLayerPart::PrintableMeshLayerPart(SliceDataStorage& storage, unsigned int mesh_idx, unsigned int layer_idx, unsigned int part_idx)
-: PrintableLayerPart(storage, storage.meshes[mesh_idx].getSettingAsCount("extruder_nr"), layer_idx)
+: PrintableLayerPart(storage, (unsigned int) storage.meshes[mesh_idx].getSettingAsCount("extruder_nr"), layer_idx)
 , mesh_idx(mesh_idx)
 , layer_idx(layer_idx)
 , part_idx(part_idx)

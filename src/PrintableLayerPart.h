@@ -24,7 +24,10 @@ public:
     bool isGenerated();
     int getExtruderNr();
     int getLayerNr();
+    
 protected:
+    virtual void writeGcode(GCodePlanner& layer_plan) = 0;
+    
     SliceDataStorage& storage;
     // TODO: maybe migrate the is_generated boolean to somewhere inside the Towering algorithm since it really is
     // more of an implementation detail of that algorithm
@@ -33,10 +36,9 @@ protected:
     int layer_nr;
     
     
-    virtual void writeGcode(GCodePlanner& layer_plan);
     
     
-    PrintableLayerPart(SliceDataStorage& storage, int extruder_nr, int layer_nr)
+    PrintableLayerPart(SliceDataStorage& storage, unsigned int extruder_nr, unsigned int layer_nr)
     : storage(storage)
     , is_generated(false)
     , extruder_nr(extruder_nr)
